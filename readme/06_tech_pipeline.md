@@ -85,6 +85,6 @@ ReachRadar/
   - ตั้ง Root Directory = `web` และ Framework = Vite (Vercel ตรวจเจอเอง: build `npm run build`, output `dist`) หรือรัน `vercel --prod` จากในโฟลเดอร์ `web/`
   - URL ที่จะได้: `/` (หน้าหลังบ้าน) หน้าเดียว เปิดเป็นสาธารณะ
   - ข้อมูลเปลี่ยนเมื่อไหร่ ต้องรันสคริปต์ 18 ในเครื่องก่อน (อัปเดต `web/src/data/` และ `web/public/thumbs/`) แล้วค่อย deploy ใหม่
-- GitHub repo: **https://github.com/aom-thanya/reachradar** (public, push ครั้งแรก 28 พ.ย. 2569) เก็บ `scripts/`, `readme/`, `web/`, `web_src/`, `README.md`, `CLAUDE.md` · `.gitignore` ที่ราก repo กัน `data/`, `.venv/`, `.venv-ytdlp/`, `web/node_modules/`, `web/dist/`
+- GitHub repo: **https://github.com/aom-thanya/reachradar** (public, push ครั้งแรก 28 พ.ย. 2569) เก็บ `scripts/`, `readme/`, `web/`, `web_src/`, `README.md`, `CLAUDE.md` · `.gitignore` ที่ราก repo กัน `/data/` (มี `/` นำหน้า เพื่อไม่ให้กัน `web/src/data/` ไปด้วย), `.venv/`, `.venv-ytdlp/`, `web/node_modules/`, `web/dist/`
 - `data/` ทั้งหมดไม่ขึ้น Vercel ส่วนการแยกไฟล์ที่เผยแพร่ได้ดูหัวข้อ "การเผยแพร่ข้อมูล" ใน [07_limitations_privacy.md](07_limitations_privacy.md)
 - Dashboard มีแค่ตัวเลขสรุป ไม่มีชื่อบัญชีหรือข้อความคอมเม้น

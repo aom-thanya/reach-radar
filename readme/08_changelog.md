@@ -3,6 +3,7 @@
 เรียงจากใหม่ไปเก่า บันทึกทุกครั้งที่ตัดสินใจหรือเปลี่ยนวิธีคิด
 
 ## 2569-11-28
+- **แก้ Vercel build ล้ม:** `.gitignore` บรรทัด `data/` ไปกัน `web/src/data/backoffice.json` ด้วย ทำให้ build หาไฟล์ไม่เจอ (TS2307) แก้เป็น `/data/` ให้กันเฉพาะโฟลเดอร์ราก แล้วลอง build จากสำเนาที่ clone ใหม่ผ่านก่อน push
 - **Push ขึ้น GitHub ครั้งแรก:** https://github.com/aom-thanya/reachradar (public) วางต่อจาก commit แรกของ repo · ก่อน push สแกนไฟล์ที่จะขึ้นแล้ว `web/src/data/backoffice.json` และ `web_src/data.json` เป็นยอดรวมทั้งหมด ไม่มีชื่อบัญชีหรือข้อความคอมเม้น · เจอชื่อบัญชีที่น่าจะเป็นของจริงในคอมเม้นต์โค้ด `scripts/gen_rules.py` จึงเปลี่ยนเป็นชื่อสมมติ · `.gitignore` ใหม่กัน `data/`, venv, `node_modules`, `dist` (แทนไฟล์ Java เดิมของ repo) · README ของ repo ใช้ฉบับในโปรเจกต์แทนของเดิม 2 บรรทัด
 - **เพิ่ม Rubric Capstone:** คัด Rubric ของวิชา MADT7202 จาก Syllabus มาไว้ที่ [10_capstone_rubric.md](10_capstone_rubric.md) ทั้งตารางต้นฉบับและข้อตรวจที่แตกจากช่อง 5 คะแนน เว้นช่องหลักฐานและสถานะไว้ให้เจ้าของกรอกตอนเช็กว่างานได้คะแนนเต็มหรือยัง · ระบุชัดว่า Capstone เป็นงานกลุ่ม (Mid-term เป็นงานเดี่ยว)
 

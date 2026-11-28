@@ -1,6 +1,6 @@
 # ข้อมูลดิบและรายคน อยู่ในเครื่องเท่านั้น
-data/
-data/secrets/
+/data/
+/data/secrets/
 
 # Python env
 .venv/
