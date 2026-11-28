@@ -1,4 +1,4 @@
-import { useEffect, useState, type ComponentType } from "react";
+import { Suspense, lazy, useEffect, useState, type ComponentType } from "react";
 import { D } from "./data";
 import { OverlayProvider, useHideTip, useModal } from "./components/overlay";
 import { Icon } from "./components/ui";
@@ -11,6 +11,9 @@ import Packages from "./pages/Packages";
 import Planner from "./pages/Planner";
 import Safety from "./pages/Safety";
 import Slots from "./pages/Slots";
+
+// Hidden page: reachable only by typing #journey, not listed in the menu.
+const Journey = lazy(() => import("./journey/Journey"));
 
 const ROUTES: Record<PageId, ComponentType> = { home: Home, match: Match, slots: Slots, packages: Packages, safety: Safety, audience: Audience, brands: Brands, planner: Planner };
 
@@ -49,5 +52,12 @@ function Shell() {
 }
 
 export default function App() {
+  const [hidden, setHidden] = useState(() => location.hash === "#journey");
+  useEffect(() => {
+    const on = () => setHidden(location.hash === "#journey");
+    window.addEventListener("hashchange", on);
+    return () => window.removeEventListener("hashchange", on);
+  }, []);
+  if (hidden) return <Suspense fallback={null}><Journey /></Suspense>;
   return <OverlayProvider><Shell /></OverlayProvider>;
 }
