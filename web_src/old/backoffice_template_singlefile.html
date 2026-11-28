@@ -1,0 +1,1550 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ReachRadar หลังบ้าน</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500;600&family=Fira+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+/* Layout: studio control room. Left rail = channels (pages), main = monitor wall of panels; red "on air" light marks what to act on. */
+:root {
+  /* ui-ux-pro-max design system: Data-Dense Dashboard · corporate navy + amber · density 8 */
+  --bg: #F8FAFC; --surface: #FFFFFF; --sunk: #EEF2F8; --ink: #0F2557; --ink-2: #475569; --ink-3: #64748B;
+  --line: #DBE4F3; --accent: #1E40AF; --accent-soft: #DBEAFE; --accent-ink: #FFFFFF;
+  --up: #D97706; --down: #3B82F6; --good: #15803D; --good-soft: #DCFCE7; --cool: #3B82F6; --cool-soft: #E0ECFE; --warn: #B45309; --warn-soft: #FEF3C7;
+  --gz: #7C3AED; --gy: #0EA5E9; --gx: #0F766E;
+  --l1: #0F2557; --l2: #64748B; --l3: #CBD5E1;
+  --f-display: "Fira Sans", "IBM Plex Sans Thai", "Leelawadee UI", "Thonburi", sans-serif;
+  --f-body: "Fira Sans", "IBM Plex Sans Thai", "Leelawadee UI", "Thonburi", system-ui, sans-serif;
+  --f-num: "Fira Code", "Fira Sans", ui-monospace, monospace;
+  --r: 8px; --shadow: 0 1px 2px rgba(15, 37, 87, .06);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B1220; --surface: #111A2E; --sunk: #172238; --ink: #E2E8F0; --ink-2: #A3B1C6; --ink-3: #7B8AA3;
+  --line: #22304D; --accent: #60A5FA; --accent-soft: #172B54; --accent-ink: #0B1220;
+  --up: #F59E0B; --down: #60A5FA; --good: #4ADE80; --good-soft: #12301F; --cool: #60A5FA; --cool-soft: #15264A; --warn: #FBBF24; --warn-soft: #3A2B0C;
+  --gz: #A78BFA; --gy: #38BDF8; --gx: #2DD4BF; --l1: #E2E8F0; --l2: #8796AE; --l3: #334360;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0B1220; --surface: #111A2E; --sunk: #172238; --ink: #E2E8F0; --ink-2: #A3B1C6; --ink-3: #7B8AA3;
+  --line: #22304D; --accent: #60A5FA; --accent-soft: #172B54; --accent-ink: #0B1220;
+  --up: #F59E0B; --down: #60A5FA; --good: #4ADE80; --good-soft: #12301F; --cool: #60A5FA; --cool-soft: #15264A; --warn: #FBBF24; --warn-soft: #3A2B0C;
+  --gz: #A78BFA; --gy: #38BDF8; --gx: #2DD4BF; --l1: #E2E8F0; --l2: #8796AE; --l3: #334360;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35); color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.6; }
+h1, h2, h3 { font-family: var(--f-display); line-height: 1.25; margin: 0; text-wrap: balance; }
+h1 { font-size: 28px; } h2 { font-size: 20px; } h3 { font-size: 16px; }
+p { margin: 0; }
+button { font: inherit; color: inherit; }
+a { color: var(--cool); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--ink-2); } .small { font-size: 13px; }
+
+.app { display: grid; grid-template-columns: 236px minmax(0, 1fr); min-height: 100vh; }
+.side { position: sticky; top: env(safe-area-inset-top, 0px); height: 100vh; padding: 22px 14px; padding-left: max(14px, env(safe-area-inset-left, 0px));
+  border-right: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; gap: 18px; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; }
+.onair { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); flex: none; }
+.brand b { font-family: var(--f-display); font-size: 18px; }
+.brand span { display: block; font-size: 12px; color: var(--ink-3); }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav a { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; color: var(--ink-2); text-decoration: none; font-weight: 500; }
+.nav a:hover { background: var(--sunk); color: var(--ink); }
+.nav a[aria-current="page"] { background: var(--accent-soft); color: var(--ink); }
+.nav a[aria-current="page"] .ico { color: var(--accent); }
+.nav .ico { width: 18px; height: 18px; flex: none; }
+.nav a.cta { margin-top: 6px; border: 1px dashed var(--line); }
+.side .foot { margin-top: auto; font-size: 12px; color: var(--ink-3); padding: 0 8px; display: grid; gap: 8px; }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--cool); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; text-align: left; }
+
+main { padding-block: 28px 56px; padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); max-width: 1180px; width: 100%; }
+.page { display: grid; gap: 22px; }
+.page-head { display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; letter-spacing: .06em; color: var(--ink-3); font-weight: 600; }
+.lead { color: var(--ink-2); max-width: 68ch; }
+
+.grid { display: grid; gap: 14px; }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; min-width: 0; display: grid; gap: 12px; align-content: start; }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.kpi { display: grid; gap: 2px; }
+.kpi .v { font-family: var(--f-display); font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi .l { font-size: 13px; color: var(--ink-2); }
+.card { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; cursor: pointer; display: grid; gap: 8px; align-content: start; min-width: 0; box-shadow: var(--shadow); transition: border-color .15s, transform .15s; }
+.card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.card .more { font-size: 13px; color: var(--accent); font-weight: 600; }
+.insight { border-left: 0; }
+.card > .chip { justify-self: start; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--sunk); color: var(--ink-2); white-space: nowrap; }
+.chip.hot { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.chip.good { background: var(--good-soft); color: var(--good); }
+.chip.cool { background: var(--cool-soft); color: var(--cool); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.note { font-size: 13px; color: var(--ink-2); background: var(--sunk); border-radius: 8px; padding: 10px 12px; }
+.note.warn { background: var(--warn-soft); color: var(--ink); }
+.term { border-bottom: 1px dotted var(--ink-3); cursor: help; background: none; border-top: 0; border-left: 0; border-right: 0; padding: 0; }
+.qbtn { position: relative; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 12px; line-height: 1; cursor: pointer; color: var(--ink-2); flex: none; }
+
+/* bars */
+.bars { display: grid; gap: 8px; }
+.bar-row { display: grid; grid-template-columns: minmax(84px, 150px) minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 14px; }
+.bar-row .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.track { height: 12px; background: var(--sunk); border-radius: 0 4px 4px 0; position: relative; }
+.fill { height: 100%; border-radius: 0 4px 4px 0; }
+.bar-row .val { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 56px; text-align: right; }
+.stack { display: flex; height: 16px; gap: 2px; border-radius: 4px; overflow: hidden; }
+.stack i { display: block; height: 100%; min-width: 2px; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.stack-lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-2); gap: 6px; flex-wrap: wrap; }
+
+/* diverging lift chart */
+.lift-row { display: grid; grid-template-columns: minmax(96px, 170px) minmax(0, 1fr) 52px; gap: 10px; align-items: center; font-size: 14px; }
+.lift-track { position: relative; height: 14px; }
+.lift-track::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--ink-3); }
+.lift-fill { position: absolute; top: 0; height: 100%; border-radius: 3px; }
+
+/* table */
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+th:first-child, td:first-child { text-align: left; }
+th { font-size: 12px; color: var(--ink-2); font-weight: 600; }
+th button { background: none; border: 0; padding: 0; cursor: pointer; font-weight: 600; color: inherit; }
+tbody tr.click { cursor: pointer; }
+tbody tr.click:hover td { background: var(--sunk); }
+.up { color: var(--up); font-weight: 600; } .down { color: var(--down); }
+
+/* planner */
+.planner { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.form { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+.field { display: grid; gap: 8px; }
+.field > label, .field > .flabel { font-weight: 600; font-size: 14px; }
+.field .hint { font-size: 12px; color: var(--ink-3); }
+select, input[type="number"] { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.rec { display: grid; gap: 10px; }
+.rec-card { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 14px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.rank { width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; font-family: var(--f-display); font-weight: 700; background: var(--sunk); }
+.rec-card:first-child .rank { background: var(--accent); color: var(--accent-ink); }
+.score { text-align: right; }
+.score b { font-family: var(--f-display); font-size: 22px; }
+.big { font-family: var(--f-display); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.example { font-size: 12px; color: var(--warn); font-weight: 600; }
+
+/* dialog */
+dialog { border: 0; border-radius: 14px; padding: 0; width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); background: var(--surface); color: var(--ink); box-shadow: 0 20px 60px rgba(0, 0, 0, .3); }
+dialog::backdrop { background: rgba(10, 16, 24, .45); }
+.dlg-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--surface); z-index: 1; }
+.dlg-body { padding: 18px 20px 22px; display: grid; gap: 16px; }
+.xbtn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; width: 34px; height: 34px; cursor: pointer; font-size: 18px; }
+.gloss dt { font-weight: 600; margin-top: 10px; } .gloss dd { margin: 2px 0 0; color: var(--ink-2); }
+.gloss dt.hl { color: var(--accent); }
+
+#tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 6px 9px; border-radius: 6px; max-width: 260px; }
+
+
+/* dashboard */
+.dash-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+.fbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 14px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 4; }
+.fbar select { width: auto; padding: 5px 8px; }
+.fbar .flabel { font-size: 12px; font-weight: 600; color: var(--ink-3); letter-spacing: .04em; margin-left: 6px; }
+.fchip { border: 0; cursor: pointer; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; }
+.tile-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.tile .l { font-size: 12px; color: var(--ink-2); font-weight: 600; }
+.tile-mid { display: grid; gap: 4px; min-width: 0; }
+.tile .v { font-family: var(--f-display); font-size: 24px; font-weight: 700; line-height: 1.1; white-space: nowrap; }
+.tile .d { font-size: 12px; color: var(--ink-3); min-height: 18px; }
+.tile .d.up { color: var(--up); font-weight: 600; } .tile .d.down { color: var(--down); font-weight: 600; }
+.spark { display: block; width: 100%; max-width: 100%; }
+.dgrid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; }
+.span4 { grid-column: span 4; } .span5 { grid-column: span 5; } .span6 { grid-column: span 6; } .span7 { grid-column: span 7; } .span8 { grid-column: span 8; } .span12 { grid-column: span 12; }
+.chart { width: 100%; position: relative; }
+.chart svg { display: block; overflow: visible; }
+.chart .ax { font-size: 11px; fill: var(--ink-3); font-family: var(--f-body); }
+.chart .lbl { font-size: 12.5px; fill: var(--ink); font-family: var(--f-body); }
+.chart .lbl.dim { fill: var(--ink-3); }
+.chart .val { font-size: 12px; fill: var(--ink-2); font-family: var(--f-body); font-weight: 600; }
+.chart .blab { fill: var(--ink-2); font-family: var(--f-body); font-weight: 600; font-variant-numeric: tabular-nums; pointer-events: none; }
+.chart .hit { cursor: pointer; }
+.chart .hit:hover rect, .chart rect.hit:hover, .chart circle.hit:hover { opacity: .8; }
+.cap { font-size: 12px; color: var(--ink-3); }
+.cap.sub { display: block; font-weight: 400; margin-top: 2px; }
+td.nowrap { white-space: nowrap; }
+.mini3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.mini3 > div { display: grid; }
+.mini3 b { font-family: var(--f-display); font-size: 18px; }
+.pairs { display: grid; gap: 12px; }
+.pair { display: grid; grid-template-columns: 90px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 10px; row-gap: 4px; background: none; border: 0; padding: 4px; border-radius: 8px; cursor: pointer; text-align: left; }
+.pair:hover { background: var(--sunk); }
+.pair .pl { grid-row: span 2; font-weight: 600; align-self: center; }
+.pb { display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 8px; align-items: center; }
+table.heat td.cell { text-align: center; }
+table.heat th { text-align: center; }
+th.rot { white-space: normal; min-width: 70px; font-size: 11px; vertical-align: bottom; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.inbar { display: inline-block; width: 46px; height: 6px; background: var(--sunk); border-radius: 3px; margin-right: 8px; vertical-align: middle; overflow: hidden; }
+.inbar i { display: block; height: 100%; background: var(--accent); }
+.eptitle { max-width: 360px; overflow: hidden; text-overflow: ellipsis; }
+.search { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; width: min(320px, 100%); }
+.scrolly { max-height: 460px; overflow-y: auto; }
+
+/* business pages */
+.ngroup { font-size: 11px; letter-spacing: .06em; color: var(--ink-3); font-weight: 600; padding: 12px 10px 4px; }
+.tile .v, .kpi .v, .big, .mini3 b, .score b { font-family: var(--f-display); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.tile .v { font-size: 21px; overflow: hidden; text-overflow: ellipsis; }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); border-radius: 8px; padding: 7px 12px; font-weight: 600; font-size: 13px; cursor: pointer; transition: opacity .15s; }
+.btn:hover { opacity: .88; } .btn .ico { width: 16px; height: 16px; }
+.pack .btn { justify-self: start; background: var(--surface); color: var(--accent); }
+.rank-list { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.rank-list li { display: grid; gap: 1px; }
+.rank-list li .chip { justify-self: start; }
+th.sel { color: var(--accent); }
+.chart .q { font-weight: 600; fill: var(--ink-2); }
+.chart .small-lbl { font-size: 11px; fill: var(--ink-2); }
+.inbar.wide { width: 90px; }
+tr.hl td { background: var(--warn-soft); }
+.copybox { width: 100%; font: inherit; font-size: 13px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.card, .tile, .panel { transition: border-color .2s; }
+@media (max-width: 820px) { .ngroup { display: none; } }
+
+/* video covers */
+.thumb { width: 64px; height: 36px; object-fit: cover; border-radius: 4px; vertical-align: middle; margin-right: 10px; background: var(--sunk); }
+.eptitle { max-width: 420px; }
+.covers { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 12px; }
+.cover { display: grid; gap: 6px; align-content: start; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; color: inherit; text-decoration: none; min-width: 0; }
+.cover-img { position: relative; display: block; border-radius: 8px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--sunk); }
+.cover-thumb { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s; }
+.cover:hover .cover-thumb { transform: scale(1.04); }
+.cover-badge { position: absolute; right: 6px; bottom: 6px; background: rgba(8, 14, 28, .82); color: #fff; font-size: 12px; font-weight: 600; padding: 2px 7px; border-radius: 5px; font-family: var(--f-num); }
+.cover-t { font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.hero { position: relative; display: block; border-radius: 10px; overflow: hidden; aspect-ratio: 16 / 9; max-height: 320px; background: var(--sunk); }
+.hero-img { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(1.05); }
+.hero .play { position: absolute; inset: 0; margin: auto; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: rgba(8, 14, 28, .75); color: #fff; font-size: 22px; padding-left: 4px; transition: transform .2s; }
+.hero:hover .play { transform: scale(1.08); }
+.hero-cap { position: absolute; left: 10px; bottom: 10px; background: rgba(8, 14, 28, .75); color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 5px; }
+@media (prefers-reduced-motion: reduce) { .cover-thumb, .hero .play { transition: none; } .cover:hover .cover-thumb, .hero:hover .play { transform: none; } }
+
+/* planner: requirement form + report paper (paper keeps a white print look in both themes) */
+.req { gap: 16px; max-width: 900px; }
+.req-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.req input[type="text"] { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; }
+.req-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 14px; }
+.big-btn { font-size: 15px; padding: 10px 18px; min-height: 44px; }
+.btn.ghost { background: var(--surface); color: var(--accent); }
+.btn[aria-pressed="true"] { background: var(--warn-soft); color: var(--ink); border-color: var(--warn); }
+.rtoolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 4; background: var(--bg); padding-block: 8px; }
+.rtoolbar .grow { flex: 1; }
+.paper-wrap { display: grid; justify-items: center; gap: 12px; }
+.paper { width: min(800px, 100%); background: #ffffff; color: #0F2557; border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 8px 30px rgba(15, 37, 87, .12); padding: 36px 40px; display: grid; gap: 6px; font-family: var(--f-body); }
+.paper .rsec { padding: 10px 0 14px; display: grid; gap: 8px; background: #ffffff; }
+.paper h1 { font-size: 26px; color: #0F2557; }
+.paper h2 { font-size: 15px; color: #1E40AF; letter-spacing: .02em; border-bottom: 2px solid #DBEAFE; padding-bottom: 4px; }
+.paper p { color: #334155; line-height: 1.7; }
+.pbrand { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #64748B; letter-spacing: .04em; }
+.pbrand .onair { background: #1E40AF; box-shadow: none; width: 8px; height: 8px; }
+.pmeta { font-size: 13px; color: #64748B !important; }
+.ptable { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ptable th { text-align: left; width: 34%; color: #64748B; font-weight: 500; padding: 6px 0; border-bottom: 1px solid #E2E8F0; white-space: normal; }
+.ptable td { text-align: left; color: #0F2557; padding: 6px 0; border-bottom: 1px solid #E2E8F0; white-space: normal; }
+.pcards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pcard { display: grid; gap: 4px; align-content: start; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px; }
+.pcard b { color: #0F2557; } .pcard p { font-size: 12.5px; line-height: 1.5; }
+.pnum { font-size: 12px; color: #64748B; font-variant-numeric: tabular-nums; }
+.pcover { position: relative; border-radius: 6px; overflow: hidden; aspect-ratio: 16 / 9; background: #EEF2F8; }
+.pthumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pcover-cap { position: absolute; left: 6px; bottom: 6px; background: rgba(8, 14, 28, .8); color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 4px; }
+.pkpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.pkpis > div { display: grid; gap: 2px; background: #F1F5FB; border-radius: 8px; padding: 10px; }
+.pkpis b { font-size: 20px; color: #1E40AF; font-variant-numeric: tabular-nums; }
+.pkpis span { font-size: 12px; color: #64748B; }
+.plab { font-size: 12px; color: #64748B !important; margin-top: 6px; }
+.pstack { display: flex; height: 14px; gap: 2px; border-radius: 4px; overflow: hidden; }
+.pstack i { display: block; height: 100%; }
+.plegend { font-size: 12px; color: #475569 !important; }
+.pfoot p { font-size: 11.5px; color: #64748B !important; }
+.paper.editing .ed { outline: 1px dashed #D97706; outline-offset: 3px; border-radius: 2px; cursor: text; }
+.paper.editing .ed:focus { outline: 2px solid #D97706; background: #FFFBEB; }
+.sk-paper { gap: 14px; }
+.sk { border-radius: 6px; background: linear-gradient(90deg, #EEF2F8 25%, #E2E8F0 37%, #EEF2F8 63%); background-size: 400% 100%; animation: sk 1.1s ease infinite; }
+.sk-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.sk-row:nth-of-type(2) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@keyframes sk { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+@media (max-width: 700px) { .req-grid, .pcards { grid-template-columns: minmax(0, 1fr); } .pkpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .paper { padding: 22px 18px; } }
+
+.qbtn::before { content: ""; position: absolute; inset: -10px; }
+.start { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 14px 18px; border-radius: var(--r); background: var(--accent); color: var(--accent-ink); text-decoration: none; transition: opacity .15s; }
+.start:hover { opacity: .92; } .start b { display: block; font-size: 17px; } .start .cap { color: inherit; opacity: .85; }
+.start-ico { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: rgba(255, 255, 255, .16); } .start-ico .ico { width: 22px; height: 22px; }
+.start-go { font-weight: 700; white-space: nowrap; }
+.head-r { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.callout { border: 1px solid var(--warn); background: var(--warn-soft); border-radius: var(--r); padding: 10px 14px; font-size: 14px; }
+.limits { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); font-size: 13px; color: var(--ink-2); }
+.limits > summary { cursor: pointer; padding: 10px 14px; font-weight: 600; list-style: none; display: flex; gap: 8px; align-items: center; }
+.limits > summary::-webkit-details-marker { display: none; }
+.limits > summary::before { content: "i"; flex: none; display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: var(--sunk); color: var(--ink-2); font-size: 11px; font-weight: 700; font-style: italic; }
+.limits > summary::after { content: "\25BE"; margin-left: auto; color: var(--ink-3); }
+.limits[open] > summary::after { content: "\25B4"; }
+.limits > summary:hover { color: var(--ink); }
+.limits > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: var(--r); }
+.limits ul.limits-b { margin: 0; padding: 0 16px 12px 34px; display: grid; gap: 6px; }
+.limits div.limits-b { padding: 0 14px 12px; display: grid; gap: 8px; }
+.paper .answer { background: #F1F5FB !important; border-radius: 10px; padding: 16px 18px; margin: 6px 0 4px; }
+.akicker { font-size: 12px; font-weight: 700; letter-spacing: .06em; color: #D97706; }
+.paper .ahead { font-size: 19px; font-weight: 700; color: #0F2557; line-height: 1.45; }
+.answer .pkpis > div { background: #FFFFFF; }
+.phint { font-size: 12px !important; color: #64748B !important; }
+.pwhy { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 12.5px; color: #334155; line-height: 1.5; }
+.pwhy.big { font-size: 14px; } .pwhy.small { font-size: 11.5px; color: #64748B; }
+.pcover { display: block; } .pplay { position: absolute; inset: 0; margin: auto; width: 34px; height: 34px; border-radius: 50%; background: rgba(8, 14, 28, .72); color: #fff; display: grid; place-items: center; font-size: 13px; padding-left: 2px; }
+.plinks { display: grid; gap: 4px; font-size: 11.5px; color: #64748B; border-top: 1px solid #E2E8F0; padding-top: 6px; }
+.plinks a { color: #1E40AF; text-decoration: none; display: flex; align-items: center; gap: 6px; line-height: 1.3; }
+.plinks a:hover { text-decoration: underline; }
+.plthumb { width: 40px; height: 22px; object-fit: cover; border-radius: 3px; flex: none; }
+.pformat { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; }
+.pfbox { border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px 12px; margin: 10px 0; break-inside: avoid; }
+.pfbox .pfname { display: block; color: #0F2557; font-size: 14.5px; margin-bottom: 2px; }
+.plevel { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: #E2E8F0; color: #334155; white-space: nowrap; }
+.plevel.good { background: #DCFCE7; color: #15803D; } .plevel.warn { background: #FEF3C7; color: #B45309; }
+.paper .pstrong { font-weight: 700; color: #0F2557; }
+.paper .psmall { font-size: 12px; color: #64748B; }
+.paper .ptip { font-size: 13px; background: #FFFBEB; border-left: 3px solid #D97706; padding: 6px 10px; color: #334155; }
+.pcompare { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 4px; }
+.pcompare th, .pcompare td { text-align: left; padding: 5px 8px; border-bottom: 1px solid #E2E8F0; color: #334155; white-space: normal; }
+.pcompare th { color: #64748B; font-weight: 600; } .pcompare tr.sel td { background: #EFF6FF; font-weight: 700; color: #1E40AF; }
+@media (max-width: 700px) { .start { grid-template-columns: auto minmax(0, 1fr); } .start-go { grid-column: span 2; } }
+@media (max-width: 980px) { .span4, .span5, .span6, .span7, .span8 { grid-column: span 12; } }
+@media (max-width: 980px) { .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g3 { grid-template-columns: minmax(0, 1fr); } .planner { grid-template-columns: minmax(0, 1fr); } .form { position: static; } }
+@media (max-width: 820px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+  .side { min-width: 0; position: sticky; top: env(safe-area-inset-top, 0px); height: auto; z-index: 5; flex-direction: row; align-items: center; padding: 10px 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .brand span, .side .foot { display: none; }
+  .nav { flex-direction: row; }
+  .nav a { white-space: nowrap; padding: 7px 10px; }
+  .nav a.cta { margin-top: 0; }
+  main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 48px; }
+  .g2 { grid-template-columns: minmax(0, 1fr); }
+  h1 { font-size: 23px; }
+}
+@media (max-width: 480px) { .g4 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .kpi .v { font-size: 22px; } .bar-row { grid-template-columns: 84px minmax(0, 1fr) auto; } }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><i class="onair" aria-hidden="true"></i><div><b>ReachRadar</b><span>หลังบ้านทีมการตลาด · โหนกระแส</span></div></div>
+    <nav class="nav" id="nav" aria-label="เมนู"></nav>
+    <div class="foot">
+      <button class="linkbtn" type="button" data-gloss="">คำศัพท์ที่ใช้ในหน้านี้</button>
+      <span id="foot-data"></span>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlg-title">
+  <div class="dlg-head"><h2 id="dlg-title"></h2><button class="xbtn" type="button" id="dlg-x" aria-label="ปิด">×</button></div>
+  <div class="dlg-body" id="dlg-body"></div>
+</dialog>
+<div id="tip" hidden></div>
+
+<script>
+const D = /*__DATA__*/null;
+const T = /*__THUMBS__*/{};
+(function () {
+"use strict";
+const GENS = D.gens, LOY = D.loyalty;
+const GCOL = { "Gen Z": "var(--gz)", "Gen Y": "var(--gy)", "Gen X ขึ้นไป": "var(--gx)" };
+const LCOL = { "แฟนตัวยง": "var(--l1)", "นักเสพข่าว": "var(--l2)", "ขาจร": "var(--l3)" };
+const LDESC = {
+  "แฟนตัวยง": "มาคอมเม้นแทบทุกสัปดาห์ เป็นฐานคนดูประจำของรายการ",
+  "นักเสพข่าว": "มาเป็นช่วงๆ ตามเรื่องที่สนใจ",
+  "ขาจร": "แวะมาคอมเม้นครั้งสองครั้ง ตอนมีเรื่องดัง",
+};
+const PAGES = [
+  { id: "home", name: "ภาพรวม", ico: "M3 12l9-8 9 8M5 10v10h14V10" },
+  { group: "ตอบโจทย์ธุรกิจ" },
+  { id: "match", name: "จับคู่แบรนด์ × Gen", ico: "M12 3v4M12 17v4M3 12h4M17 12h4M12 8a4 4 0 100 8 4 4 0 000-8z" },
+  { id: "slots", name: "ราคา Slot", ico: "M4 7h16v10H4zM8 7v10M4 12h4" },
+  { id: "packages", name: "แพ็กเกจ", ico: "M4 7l8-4 8 4v10l-8 4-8-4zM4 7l8 4 8-4M12 11v10" },
+  { id: "safety", name: "Brand safety", ico: "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" },
+  { group: "ข้อมูลเพิ่ม" },
+  { id: "audience", name: "คนดู", ico: "M8 11a3 3 0 100-6 3 3 0 000 6zm8 0a3 3 0 100-6 3 3 0 000 6zM2 20c0-3 3-5 6-5s6 2 6 5m2-5c3 0 6 2 6 5" },
+  { id: "brands", name: "แบรนด์ในรายการ", ico: "M7 7h10v10H7zM3 12h4M17 12h4" },
+  { group: "เครื่องมือ" },
+  { id: "planner", name: "วางแผนแคมเปญ", ico: "M4 4h16v16H4zM8 9h8M8 13h5M15 15l2 2 3-4", cta: true },
+];
+const GLOSS = [
+  ["คนคอมเม้น", "คนที่เขียนคอมเม้นหรือตอบคอมเม้นใต้คลิปโหนกระแสบน YouTube ตัวเลขทั้งหมดในหน้านี้มาจากคนกลุ่มนี้ ไม่ใช่คนดูทั้งหมด คนที่ดูเงียบๆ หรือดูทางทีวีไม่อยู่ในตัวเลข"],
+  ["แฟนตัวยง", "คนที่คอมเม้นหลาย EP และต่อเนื่องหลายเดือน แบ่งกลุ่มด้วยวิธี k-means จากจำนวน EP จำนวนคอมเม้น และระยะเวลาที่คอมเม้น"],
+  ["นักเสพข่าว", "คนที่คอมเม้นเป็นช่วงๆ มากกว่าขาจร แต่ไม่สม่ำเสมอเท่าแฟนตัวยง"],
+  ["ขาจร", "คนที่คอมเม้นแค่ 1–2 EP ส่วนใหญ่มาตอนมีเรื่องดัง ใช้วัดว่า EP ไหนดึงคนใหม่ได้"],
+  ["สายความสนใจ", "กลุ่มขาประจำ (คอมเม้นตั้งแต่ 3 EP) ที่ชอบเรื่องแนวเดียวกัน เทียบกับสิ่งที่รายการออกอากาศช่วงที่เขาดู สายเป็นแนวโน้ม คนหนึ่งยังดูเรื่องอื่นด้วย"],
+  ["+4% / 3.2 เท่า", "เทียบกับค่าปกติของทั้งรายการ: +4% คือมากกว่าปกติ 4% · −10% คือน้อยกว่าปกติ 10% · 3.2 เท่า คือมากกว่าปกติ 3.2 เท่า"],
+  ["Gen", "วัยของคนคอมเม้น แบ่ง 3 กลุ่ม Gen Z (เกิด 2540 ขึ้นไป) Gen Y (2524–2539) Gen X ขึ้นไป (ก่อน 2524) เป็นค่าประเมินจากข้อความ ไม่ได้มาจากบัตรประชาชน ภาพรวมแม่นราว 69% ในคนที่ประเมินได้ จึงใช้ดูทิศทาง · คนที่สัญญาณไม่พอจะเป็น \"ไม่ระบุ\" และไม่ถูกนับในสัดส่วน"],
+  ["ค่ากลาง", "ค่าตรงกลางเมื่อเรียงจากน้อยไปมาก (median) ไม่ถูกดึงด้วย EP ที่ดังผิดปกติ จึงใช้แทนค่าเฉลี่ย"],
+  ["คอมเม้นต่อ 1,000 วิว", "ทุก 1,000 วิวมีคนคอมเม้นกี่ครั้ง ใช้ดูว่าเรื่องไหนคนอยากออกความเห็น โดยไม่ขึ้นกับว่าคลิปดังแค่ไหน"],
+  ["Conversion", "สัดส่วนคนที่ซื้อหรือใช้โค้ดหลังเห็นโฆษณา ตอนนี้ยังไม่มีข้อมูลจริง ต้องรอผล Pilot ที่ใช้โค้ดส่วนลดแยกทุก EP"],
+];
+const PRODUCTS = [
+  { id: "health", name: "สุขภาพ / อาหารเสริม / ยาสามัญ", sai: ["สายสังคม-ศาสนา-ข้อพิพาท"] },
+  { id: "beauty", name: "ความงาม / สกินแคร์ / เครื่องสำอาง", sai: ["สายดราม่าคนดัง"] },
+  { id: "shop", name: "แฟชั่น / แอปช็อปปิ้ง / มือถือ", sai: ["สายดราม่าคนดัง"] },
+  { id: "food", name: "อาหาร / เครื่องปรุง / ของใช้ในบ้าน", sai: ["สายครอบครัว-ชู้สาว"] },
+  { id: "family", name: "แม่และเด็ก", sai: ["สายครอบครัว-ชู้สาว"] },
+  { id: "legal", name: "ประกัน / กฎหมาย / ที่ปรึกษา", sai: ["สายครอบครัว-ชู้สาว", "สายสังคม-ศาสนา-ข้อพิพาท"] },
+  { id: "bank", name: "ธนาคาร / กันมิจฉาชีพ", sai: ["สายเรื่องร้อนครบเครื่อง"] },
+  { id: "fmcg", name: "เครื่องดื่มชูกำลัง / ยาดม / ของซื้อบ่อย", sai: ["สายเรื่องร้อนครบเครื่อง"] },
+];
+const SAI_FIT = {
+  "สายดราม่าคนดัง": "สกินแคร์ เครื่องสำอาง แฟชั่น แอปช็อปปิ้ง มือถือ สตรีมมิ่ง",
+  "สายครอบครัว-ชู้สาว": "ของใช้ในบ้าน อาหารและเครื่องปรุง แม่และเด็ก ประกัน บริการกฎหมาย",
+  "สายเรื่องร้อนครบเครื่อง": "ของที่ต้องเห็นซ้ำบ่อย เช่น เครื่องดื่มชูกำลัง ยาดม ธนาคารและบริการกันมิจฉาชีพ สปอนเซอร์ระยะยาว",
+  "สายสังคม-ศาสนา-ข้อพิพาท": "สุขภาพและอาหารเสริม ยาสามัญประจำบ้าน ประกันสุขภาพ บริการผู้สูงอายุ",
+};
+const GOALS = [
+  { id: "reach", name: "ให้คนเห็นเยอะ", key: "views", why: "วิวต่อ EP" },
+  { id: "new", name: "ได้คนใหม่", key: "drift", why: "สัดส่วนขาจร" },
+  { id: "loyal", name: "ย้ำกับแฟนประจำ", key: "fan", why: "สัดส่วนแฟนตัวยง" },
+  { id: "talk", name: "ให้คนพูดถึง", key: "comment_rate", why: "คอมเม้นต่อ 1,000 วิว" },
+];
+const FORMATS = [
+  { id: "onscreen", name: "พิธีกรใช้สินค้าบนจอ" },
+  { id: "read", name: "อ่านชื่อช่วงมอบของ" },
+  { id: "break", name: "โฆษณาคั่น" },
+];
+
+// ---------- helpers ----------
+const $ = (s, r = document) => r.querySelector(s);
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "style") e.style.cssText = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) e.append(k.nodeType ? k : String(k));
+  return e;
+}
+const fmt = (n) => Math.round(n).toLocaleString("en-US");
+const views = (n) => n >= 1e6 ? (n / 1e6).toFixed(2) + " ล้าน" : fmt(n);
+const pct = (n) => (n == null ? "–" : (+n).toFixed(1) + "%");
+const liftWords = (v) => v >= 1.5 ? (+v).toFixed(1) + " เท่า" : Math.round(Math.abs(v - 1) * 100) + "%";
+const x2 = (v) => v >= 1.5 ? (+v).toFixed(1) + " เท่า" : Math.abs(v - 1) < .005 ? "เท่าปกติ" : (v > 1 ? "+" : "−") + Math.round(Math.abs(v - 1) * 100) + "%";
+const tip = $("#tip");
+function bindTip(node, text) {
+  const show = (ev) => { tip.textContent = text; tip.hidden = false; const r = node.getBoundingClientRect();
+    const x = ev && ev.clientX ? ev.clientX : r.left + r.width / 2, y = ev && ev.clientY ? ev.clientY : r.top;
+    tip.style.left = Math.min(x + 12, innerWidth - tip.offsetWidth - 8) + "px"; tip.style.top = Math.max(y - tip.offsetHeight - 10, 8) + "px"; };
+  node.addEventListener("mousemove", show); node.addEventListener("focus", show);
+  node.addEventListener("mouseleave", () => tip.hidden = true); node.addEventListener("blur", () => tip.hidden = true);
+}
+function icon(path) {
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("class", "ico"); s.setAttribute("aria-hidden", "true");
+  const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  p.setAttribute("d", path); p.setAttribute("fill", "none"); p.setAttribute("stroke", "currentColor"); p.setAttribute("stroke-width", "1.8");
+  p.setAttribute("stroke-linecap", "round"); p.setAttribute("stroke-linejoin", "round"); s.append(p); return s;
+}
+const term = (word, label) => el("button", { type: "button", class: "term", onclick: () => openGloss(word) }, label || word);
+function stack(parts, label) {
+  const s = el("div", { class: "stack", role: "img", "aria-label": label || parts.map((p) => `${p.label} ${pct(p.value)}`).join(", ") });
+  parts.forEach((p) => { const i = el("i", { style: `width:${p.value}%;background:${p.color}`, tabindex: "0" }); bindTip(i, `${p.label} ${pct(p.value)}`); s.append(i); });
+  return s;
+}
+const legend = (items) => el("div", { class: "legend" }, items.map(([n, c]) => el("span", null, el("i", { style: `background:${c}` }), n)));
+function bars(rows, { max, color, fmtv = pct, note } = {}) {
+  const m = max || Math.max(...rows.map((r) => r.value)) * 1.1;
+  return el("div", { class: "bars" }, rows.map((r) => {
+    const f = el("div", { class: "fill", style: `width:${Math.max(1, r.value / m * 100)}%;background:${r.color || color || "var(--ink-2)"}` });
+    const row = el("div", { class: "bar-row", tabindex: "0" }, el("span", { class: "lbl", title: r.label }, r.label), el("div", { class: "track" }, f), el("span", { class: "val" }, fmtv(r.value)));
+    if (r.tip) bindTip(row, r.tip);
+    return row;
+  }));
+}
+function liftChart(entries, range = 3.5) {
+  // diverging on a log scale around ×1.00, left = less than usual, right = more
+  const L = Math.log(range);
+  return el("div", { class: "bars" }, entries.map(([name, v]) => {
+    const w = Math.min(Math.abs(Math.log(v)) / L, 1) * 50;
+    const f = el("div", { class: "lift-fill", style: `${v >= 1 ? "left:50%" : `left:${50 - w}%`};width:${Math.max(w, .6)}%;background:${v >= 1 ? "var(--up)" : "var(--down)"}` });
+    const row = el("div", { class: "lift-row", tabindex: "0" }, el("span", { class: "lbl" }, name), el("div", { class: "lift-track" }, f), el("span", { class: "val num", style: `font-weight:600;color:${v >= 1.15 ? "var(--up)" : v <= .85 ? "var(--down)" : "var(--ink-2)"}` }, x2(v)));
+    bindTip(row, `${name}: ${x2(v)} เทียบกับปกติ`);
+    return row;
+  }));
+}
+const genRows = (g, ci) => GENS.map((k) => ({ label: k, value: g[k], color: GCOL[k], tip: ci ? `${k} ${pct(g[k])} (ช่วงที่น่าจะเป็น ${ci[k][0]}–${ci[k][1]}%)` : `${k} ${pct(g[k])}` }));
+const loyStack = (o) => stack(LOY.map((l) => ({ label: l, value: o[l], color: LCOL[l] })));
+const loyLegend = () => legend(LOY.map((l) => [l, LCOL[l]]));
+const genLegend = () => legend(GENS.map((g) => [g, GCOL[g]]));
+const comm = (name) => D.communities.find((c) => c.name === name);
+const cat = (name) => D.categories.find((c) => c.name === name);
+const topGen = (c) => { const [g, v] = Object.entries(c.gen_lift).sort((a, b) => b[1] - a[1])[0]; return v >= 1.03 ? g : null; };
+const ratioTag = (v, base) => { const r = v / base; return r >= 1.1 ? el("span", { class: "up" }, " ▲") : r <= .9 ? el("span", { class: "down" }, " ▼") : ""; };
+
+// ---------- dialog ----------
+const dlg = $("#dlg");
+function openModal(title, body) {
+  $("#dlg-title").textContent = title; const b = $("#dlg-body"); b.replaceChildren(...[].concat(body));
+  tip.hidden = true;
+  if (typeof dlg.showModal === "function") { if (!dlg.open) dlg.showModal(); } else dlg.setAttribute("open", "");
+  b.scrollTop = 0; dlg.scrollTop = 0;
+}
+$("#dlg-x").addEventListener("click", () => dlg.close());
+dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+function openGloss(word) {
+  const dl = el("dl", { class: "gloss" });
+  GLOSS.forEach(([t, d]) => { dl.append(el("dt", { class: t === word ? "hl" : null, id: "g-" + t }, t), el("dd", null, d)); });
+  openModal("คำศัพท์ที่ใช้ในหน้านี้", dl);
+  if (word) { const n = document.getElementById("g-" + word); if (n) n.scrollIntoView({ block: "center" }); }
+}
+document.querySelectorAll("[data-gloss]").forEach((b) => b.addEventListener("click", () => openGloss(b.dataset.gloss)));
+
+// ---------- modals with detail ----------
+function loyaltyModal(l) {
+  const pr = D.loyalty_profile[l], g = D.overall.gen_by_loyalty[l];
+  openModal(l, [
+    el("p", { class: "lead" }, LDESC[l]),
+    el("div", { class: "grid g3" },
+      kpi(pct(D.overall.loyalty_pct[l]), "ของคนคอมเม้น"), kpi(pct(D.overall.comments_by_loyalty[l]), "ของคอมเม้นทั้งหมด"), kpi(fmt(pr.eps_med) + " EP", "คอมเม้น (ค่ากลางต่อคน)")),
+    el("div", { class: "panel" }, el("h3", null, "เป็นวัยไหน (ค่าประเมิน)"), bars(genRows(g.pct, g.ci), { max: 70 }), el("p", { class: "small muted" }, `ประเมินจากการอ่านคอมเม้น ${fmt(g.read)} คน ชี้ไปที่แท่งเพื่อดูช่วงที่น่าจะเป็น`)),
+    el("div", { class: "note" }, l === "แฟนตัวยง" ? "ใช้กับแบรนด์ที่อยากให้คนเห็นซ้ำหลายครั้ง วางหลาย EP ติดกันจะเจอคนกลุ่มนี้ซ้ำ" : l === "ขาจร" ? "ใช้กับแบรนด์ที่อยากได้คนใหม่ เลือก EP เรื่องดังที่ดึงคนนอกเข้ามา เช่น ดราม่าคนดัง ศาสนา" : "อยู่ระหว่างสองกลุ่ม ตามเรื่องที่สนใจเป็นช่วงๆ"),
+  ]);
+}
+function saiModal(c) {
+  const entries = Object.entries(c.lift).sort((a, b) => b[1] - a[1]);
+  const best = entries.filter(([, v]) => v >= 1.15).map(([k]) => k);
+  openModal(c.name, [
+    el("p", { class: "lead" }, c.desc),
+    el("div", { class: "grid g3" }, kpi(fmt(c.people), "คน"), kpi(pct(c.pct), "ของขาประจำ"), kpi(pct(c["แฟนตัวยง %"]), "เป็นแฟนตัวยง")),
+    el("div", { class: "panel" }, el("div", { class: "panel-head" }, el("h3", null, "ชอบคอมเม้นหมวดไหน"), el("span", { class: "small muted" }, "เทียบกับสัดส่วนที่ออกอากาศช่วงที่เขาดู")),
+      liftChart(entries), legend([["มากกว่าปกติ", "var(--up)"], ["น้อยกว่าปกติ", "var(--down)"]])),
+    el("div", { class: "grid g2" },
+      el("div", { class: "panel" }, el("h3", null, "ความภักดี"), loyStack(Object.fromEntries(LOY.map((l) => [l, c[l + " %"]]))), loyLegend()),
+      el("div", { class: "panel" }, el("h3", null, "วัย (ประเมินจากโมเดล)"), stack(GENS.map((g) => ({ label: g, value: c[g + " (model)"], color: GCOL[g] }))), genLegend())),
+    el("div", { class: "panel" }, el("h3", null, "สินค้าที่น่าจะเข้ากัน"), el("p", null, SAI_FIT[c.name] || "–"),
+      el("p", { class: "small muted" }, "เป็นสมมติฐานจากแนวเรื่องที่สายนี้ชอบ ยังไม่ได้พิสูจน์ด้วยยอดขาย"),
+      best.length ? el("div", { class: "chips" }, el("span", { class: "small" }, "วาง EP หมวด:"), best.map((b) => el("span", { class: "chip hot" }, b))) : null),
+  ]);
+}
+function catModal(c) {
+  const subs = D.tag_by_cat.filter((t) => t.category === c.name).sort((a, b) => b.eps - a.eps);
+  openModal(c.name, [
+    el("div", { class: "grid g4" }, kpi(String(c.eps), "EP ในปีนี้"), kpi(views(c.views), "วิวต่อ EP"), kpi(fmt(c.comments), "คอมเม้นต่อ EP"), kpi(c.comment_rate.toFixed(1), "คอมเม้นต่อ 1,000 วิว")),
+    el("div", { class: "grid g2" },
+      el("div", { class: "panel" }, el("h3", null, "ใครคอมเม้น (ค่ากลางต่อ EP)"), loyStack({ "แฟนตัวยง": c.fan, "นักเสพข่าว": c.news, "ขาจร": c.drift }), loyLegend(),
+        el("p", { class: "small muted" }, c.drift >= D.base.drift + 3 ? "ขาจรมากกว่า EP ทั่วไป หมวดนี้ดึงคนใหม่ได้" : c.fan >= D.base.fan + 3 ? "แฟนตัวยงมากกว่า EP ทั่วไป เหมาะย้ำกับฐานแฟน" : "สัดส่วนใกล้ EP ทั่วไป")),
+      el("div", { class: "panel" }, el("h3", null, "วัยของคนคอมเม้น"), bars(GENS.map((g) => ({ label: g, value: c.gen[g], color: GCOL[g], tip: `${g} ${pct(c.gen[g])} (${x2(c.gen_lift[g])} เทียบทั้งรายการ)` })), { max: 70 }),
+        el("p", { class: "small muted" }, "ต่างจากภาพรวมไม่มาก ใช้ดูทิศทาง"))),
+    subs.length ? el("div", { class: "panel" }, el("h3", null, "ประเด็นย่อยในหมวดนี้"),
+      el("div", { class: "tbl-wrap" }, el("table", null,
+        el("thead", null, el("tr", null, el("th", null, "ประเด็น"), el("th", null, "EP"), el("th", null, "วิว (เทียบหมวด)"), el("th", null, "คอมเม้น/1,000 วิว (เทียบหมวด)"))),
+        el("tbody", null, subs.map((s) => el("tr", null, el("td", null, s.tag), el("td", null, s.eps),
+          el("td", { class: s.views_index >= 1.15 ? "up" : s.views_index <= .85 ? "down" : "" }, x2(s.views_index)),
+          el("td", { class: s.comment_rate_index >= 1.15 ? "up" : s.comment_rate_index <= .85 ? "down" : "" }, x2(s.comment_rate_index)))))))) : null,
+    el("div", { class: "panel" }, el("h3", null, "EP ที่ได้วิวสูงสุดในหมวดนี้"),
+      el("div", { class: "covers" }, c.top_eps.slice(0, 3).map((e) => el("a", { class: "cover", href: `https://www.youtube.com/watch?v=${e.video_id}`, target: "_blank", rel: "noopener" }, el("span", { class: "cover-img" }, thumb(e.video_id, "cover-thumb")), el("span", { class: "cover-t" }, el("b", null, `EP.${e.ep} `), e.title)))),
+      el("div", { class: "bars" }, c.top_eps.slice(3).map((e) => el("div", { class: "small" }, el("a", { href: `https://www.youtube.com/watch?v=${e.video_id}`, target: "_blank", rel: "noopener" }, `EP.${e.ep}`), " ", e.title, el("span", { class: "muted num" }, ` · ${views(e.views)} วิว · ${fmt(e.comments)} คอมเม้น`))))),
+  ]);
+}
+const thumb = (vid, cls = "thumb") => T[vid] ? el("img", { src: T[vid], class: cls, alt: "", loading: "lazy" }) : null;
+const kpi = (v, l) => el("div", { class: "kpi" }, el("span", { class: "v" }, v), el("span", { class: "l" }, l));
+
+// ---------- data quality: readme/02, 04, 07 ----------
+const AGE18 = new Set([2136, 2137, 2139, 2159, 2186, 2231, 2234, 2235, 2262, 2279]);
+const age18 = (ep) => AGE18.has(ep) ? el("span", { class: "chip warn", style: "margin-left:6px", title: "คลิปจำกัดอายุ ต้องล็อกอินและอายุ 18 ปีขึ้นไปจึงจะคอมเม้นได้" }, "18+") : null;
+const GEN_UNKNOWN = Math.round((1 - D.overall.gen_labelled / D.overall.gen_read) * 100);
+const GEN_CAP = `ไม่รวมคนที่ประเมินวัยไม่ได้ (ราว ${GEN_UNKNOWN}% ของกลุ่มตัวอย่าง)`;
+const GEN_NOTE = `วัยคิดจากคนที่ประเมินได้เท่านั้น: อ่านกลุ่มตัวอย่าง ${fmt(D.overall.gen_read)} คน ระบุวัยได้ ${fmt(D.overall.gen_labelled)} คน อีกราว ${GEN_UNKNOWN}% สัญญาณไม่พอจึงเป็น "ไม่ระบุ" และไม่ถูกนับในสัดส่วน · แก้อคติด้วยอัตราการระบุได้แยกตามวัยแล้ว`;
+const CAT_KAPPA = "ความถูกต้องของการจัดหมวด: Claude จัดหมวดใหม่โดยไม่เห็นคำตอบเดิม ตรงกับที่นักวิเคราะห์จัดไว้ 34 จาก 39 EP = 87% (ช่วง 73–94%) · Cohen's kappa 0.85 · เทียบกับตัวเองรอบแรก 36 จาก 38 EP = 95% (kappa 0.94) · จุดที่ไม่ตรงเป็นเรื่องก้ำกึ่งระหว่างหมวด เช่น ถูกหลอกเงินในความสัมพันธ์";
+const LIMITS = {
+  commenters: "คนคอมเม้นไม่ใช่ผู้ชมทั้งหมด มีราว 2 คอมเม้นต่อ 1,000 วิว และมักเป็นคนที่อินกับเรื่องมากกว่าคนดูทั่วไป ให้อ่านว่าเป็น \"ผู้ชมที่มีส่วนร่วม\"",
+  genEstimate: "วัยเป็นค่าประเมินจากข้อความ ไม่ใช่อายุจริงในบัญชี เพราะทีมไม่มีสิทธิ์เข้า YouTube Studio จึงตรวจความแม่นได้จากคนที่บอกอายุตัวเองเท่านั้น",
+  genBias: "คนสูงวัยที่พิมพ์สั้นจะเป็น \"ไม่ระบุ\" บ่อยกว่าวัยรุ่น ผลจึงอาจเอียงไปทาง Gen Z ให้ดูการเทียบระหว่างหมวด (lift) มากกว่าดู % ตรงๆ",
+  age18: "10 EP เป็นคลิปจำกัดอายุ (ติดป้าย 18+ ไว้) คนคอมเม้นต้องล็อกอินและอายุ 18 ปีขึ้นไป",
+  tags: "แท็กประเด็นย่อย Claude ติดเองจากชื่อคลิปและคอมเม้นที่ได้ไลก์สูงสุด ตรวจและแก้ได้ที่ ep_tags.txt",
+  fewEps: "คู่หมวด × ประเด็นที่มีแค่ 2–3 EP เป็นสัญญาณเบื้องต้น ยังสรุปเป็นข้อเท็จจริงไม่ได้",
+  asOf: "ยอดวิวและไลก์เป็นค่า ณ วันที่ดึงข้อมูล คลิปเก่ามีเวลาสะสมยอดนานกว่าคลิปใหม่",
+  time: "เวลาของคอมเม้นเป็นค่าโดยประมาณ เพราะ YouTube แสดงแค่ \"x วัน / สัปดาห์ / เดือนที่แล้ว\"",
+  missing: "EP ที่ไม่มีในช่อง จึงไม่ได้นับ: 2128, 2167, 2170, 2211, 2213 และ 2276",
+  sai: "สายคนดูเป็นแนวโน้ม ไม่ใช่กลุ่มที่แยกขาด (กลุ่มซ้อนกันมาก silhouette ~0.12) และคนที่คอมเม้น 1–2 EP ไม่ถูกจัดสาย",
+  conv: "ยอดขายและ conversion ยังไม่มีข้อมูลจริง ต้องรอผล Pilot จึงจะยืนยันได้",
+};
+function limits(keys, title = "ข้อจำกัดของข้อมูลหน้านี้") {
+  return el("details", { class: "limits" }, el("summary", null, title),
+    el("ul", { class: "limits-b" }, keys.map((k) => el("li", null, LIMITS[k]))));
+}
+function genAccuracy() {
+  const rows = [["Gen X ขึ้นไป", "83% (68–92%)", "81% (66–91%)"], ["Gen Y", "36% (16–61%)", "42% (19–68%)"], ["Gen Z", "64% (39–84%)", "60% (36–80%)"]];
+  return el("details", { class: "limits" }, el("summary", null, "ความแม่นของการประเมินวัย (วัดกับคน 64 คนที่รู้อายุจริง)"),
+    el("div", { class: "limits-b" },
+      el("div", { class: "tbl-wrap" }, el("table", null,
+        el("thead", null, el("tr", null, el("th", { style: "text-align:left" }, "กลุ่ม"), el("th", null, "ทายว่าใช่แล้วถูกจริง"), el("th", null, "คนกลุ่มนี้ถูกจับได้"))),
+        el("tbody", null, rows.map(([a, b, c]) => el("tr", null, el("td", { style: "text-align:left" }, a), el("td", { class: "num" }, b), el("td", { class: "num" }, c)))))),
+      el("p", { class: "cap" }, "ความแม่นรวม 68.8% (57–79%) ถ้าสุ่มเดาจะได้ 33% · ตัวเลขในวงเล็บคือช่วง Wilson 95% · Gen Y แม่นน้อยสุดเพราะคนวัยทำงานเขียนคล้ายทั้งสองฝั่ง"),
+      el("p", { class: "cap" }, "ตัวเลขรายหมวดและราย EP มาจากโมเดลที่ขยายผลไปทุกคน ซึ่งทายรายคนถูก 44.9% แต่สัดส่วนรวมคลาดเคลื่อนไม่เกินราว 6 จุด จึงใช้ดูทิศทางและการเรียงลำดับ")));
+}
+
+// ---------- pages ----------
+function head(eyebrow, title, lead) { return el("div", { class: "page-head" }, el("span", { class: "eyebrow" }, eyebrow), el("h1", null, title), lead ? el("p", { class: "lead" }, lead) : null); }
+
+// ---------- dashboard state + chart helpers ----------
+const TH_M = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+const MONTHS = [...new Set(D.eps.map((e) => e.m))].sort();
+const mLabel = (m) => TH_M[+m.slice(5, 7) - 1];
+const F = { m0: 0, m1: MONTHS.length - 1, cats: new Set() };
+const METRICS = {
+  views: { name: "วิว", per: "วิวต่อ EP", total: true, fmt: views },
+  comments: { name: "คอมเม้น", per: "คอมเม้นต่อ EP", total: true, fmt: fmt },
+  cr: { name: "คอมเม้น/1,000 วิว", per: "คอมเม้นต่อ 1,000 วิว", fmt: (v) => v.toFixed(2) },
+  drift: { name: "ขาจร %", per: "ขาจร (คนใหม่) ต่อ EP", fmt: pct },
+  fan: { name: "แฟนตัวยง %", per: "แฟนตัวยงต่อ EP", fmt: pct },
+};
+let MET = "views";
+const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
+const sum = (a) => a.reduce((s, x) => s + x, 0);
+const inRange = (e) => { const i = MONTHS.indexOf(e.m); return i >= F.m0 && i <= F.m1; };
+const filtered = () => D.eps.filter((e) => inRange(e) && (!F.cats.size || F.cats.has(e.cat)));
+const isFiltered = () => F.cats.size || F.m0 > 0 || F.m1 < MONTHS.length - 1;
+const SVGNS = "http://www.w3.org/2000/svg";
+function S(tag, attrs, ...kids) { const e = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attrs || {})) if (v != null) e.setAttribute(k, v); kids.flat().forEach((k) => k != null && e.append(k.nodeType ? k : String(k))); return e; }
+const DRAWS = [];
+function chartBox(draw, h) { const d = el("div", { class: "chart", style: `height:${h}px` }); DRAWS.push([d, draw]); return d; }
+function runDraws() { DRAWS.forEach(([d, f]) => { if (d.isConnected) { d.replaceChildren(); f(d, d.clientWidth, d.clientHeight); } }); }
+let rT; window.addEventListener("resize", () => { clearTimeout(rT); rT = setTimeout(runDraws, 120); });
+function spark(vals, w = 96, h = 28) {
+  const s = S("svg", { width: "100%", height: h, viewBox: `0 0 ${w} ${h}`, preserveAspectRatio: "none", class: "spark", "aria-hidden": "true" });
+  if (vals.length < 2) return s;
+  const mx = Math.max(...vals) || 1, mn = Math.min(...vals), r = mx - mn || 1;
+  const pts = vals.map((v, i) => [i / (vals.length - 1) * (w - 4) + 2, h - 3 - (v - mn) / r * (h - 6)]);
+  s.append(S("path", { d: "M" + pts.map((p) => p.join(",")).join("L") + `L${pts[pts.length - 1][0]},${h}L${pts[0][0]},${h}Z`, fill: "var(--accent-soft)" }),
+    S("path", { d: "M" + pts.map((p) => p.join(",")).join("L"), fill: "none", stroke: "var(--accent)", "stroke-width": 2, "stroke-linejoin": "round", "vector-effect": "non-scaling-stroke" }));
+  return s;
+}
+function tile(label, value, delta, sparkVals, help) {
+  return el("div", { class: "tile" },
+    el("div", { class: "tile-top" }, el("span", { class: "l" }, label), help ? el("button", { class: "qbtn", type: "button", "aria-label": "อธิบาย " + label, onclick: () => openGloss(help) }, "?") : null),
+    el("div", { class: "tile-mid" }, el("span", { class: "v num" }, value), sparkVals ? spark(sparkVals) : null),
+    delta ? el("span", { class: "d " + (delta[1] || "") }, delta[0]) : el("span", { class: "d" }, " "));
+}
+function deltaVs(v, base, f = pct) {
+  if (!isFiltered()) return ["ทั้งปี", ""];
+  const r = base ? v / base - 1 : 0; const s = (r >= 0 ? "▲ " : "▼ ") + Math.abs(r * 100).toFixed(0) + "% เทียบทั้งปี";
+  return [s, r >= .05 ? "up" : r <= -.05 ? "down" : ""];
+}
+function monthly(eps, key, agg) { return MONTHS.map((m) => { const xs = eps.filter((e) => e.m === m).map((e) => e[key]); return xs.length ? agg(xs) : 0; }); }
+function axisY(svg, y, w, ticks, f, x0) {
+  ticks.forEach((t) => { svg.append(S("line", { x1: x0, x2: w, y1: y(t), y2: y(t), stroke: "var(--line)" }), S("text", { x: x0 - 6, y: y(t) + 4, "text-anchor": "end", class: "ax" }, f(t))); });
+}
+const niceTicks = (mx, n = 3) => { const step = Math.pow(10, Math.floor(Math.log10(mx / n))); const m = [1, 2, 2.5, 5, 10].find((k) => mx / (k * step) <= n) * step; return Array.from({ length: Math.ceil(mx / m) + 1 }, (_, i) => i * m); };
+const short = (v) => v >= 1e6 ? (v / 1e6).toFixed(v >= 1e7 ? 0 : 1) + "M" : v >= 1e3 ? (v / 1e3).toFixed(0) + "K" : String(+v.toFixed(2));
+
+function filterBar(rerender) {
+  const sel = (id, val, on) => el("select", { id, onchange: (e) => on(+e.target.value) }, MONTHS.map((m, i) => el("option", { value: i, selected: i === val }, mLabel(m) + " " + (+m.slice(0, 4) + 543))));
+  const chips = [...F.cats].map((c) => el("button", { type: "button", class: "chip hot fchip", onclick: () => { F.cats.delete(c); rerender(); } }, c, " ×"));
+  return el("div", { class: "fbar" },
+    el("span", { class: "flabel" }, "ช่วงเวลา"), sel("f-m0", F.m0, (v) => { F.m0 = Math.min(v, F.m1); rerender(); }), el("span", { class: "muted" }, "ถึง"), sel("f-m1", F.m1, (v) => { F.m1 = Math.max(v, F.m0); rerender(); }),
+    el("span", { class: "flabel" }, "หมวด"), chips.length ? chips : el("span", { class: "muted small" }, "ทุกหมวด (กดแท่งในกราฟหมวดเพื่อกรอง)"),
+    isFiltered() ? el("button", { type: "button", class: "linkbtn small", onclick: () => { F.m0 = 0; F.m1 = MONTHS.length - 1; F.cats.clear(); rerender(); } }, "ล้างตัวกรอง") : null);
+}
+
+function epModal(e) {
+  openModal(`EP.${e.ep} · ${e.cat}`, [
+    el("a", { class: "hero", href: `https://www.youtube.com/watch?v=${e.vid}`, target: "_blank", rel: "noopener", "aria-label": "เปิดคลิปบน YouTube" }, thumb(e.vid, "hero-img"), el("span", { class: "play" }, "▶"), el("span", { class: "hero-cap" }, "ดูบน YouTube")),
+    el("p", null, el("b", null, e.title), el("span", { class: "muted small" }, ` · ออกอากาศ ${e.date}`), age18(e.ep)),
+    el("div", { class: "grid g4" }, kpi(views(e.views), "วิว"), kpi(fmt(e.comments), "คอมเม้น"), kpi(e.cr.toFixed(1), "คอมเม้นต่อ 1,000 วิว"), kpi(e.lr.toFixed(1), "ไลก์ต่อ 1,000 วิว")),
+    el("div", { class: "grid g2" },
+      el("div", { class: "panel" }, el("h3", null, "ใครคอมเม้น"), loyStack({ "แฟนตัวยง": e.fan, "นักเสพข่าว": e.news, "ขาจร": e.drift }), loyLegend()),
+      e.gen ? el("div", { class: "panel" }, el("h3", null, "วัย (ประเมิน)"), stack(GENS.map((g) => ({ label: g, value: e.gen[g], color: GCOL[g] }))), genLegend()) : null),
+    e.series ? el("p", { class: "note" }, "เป็นส่วนหนึ่งของซีรีส์: " + e.series) : null,
+    AGE18.has(e.ep) ? el("p", { class: "note warn" }, "คลิปจำกัดอายุ 18+ · คนดูต้องล็อกอินและอายุ 18 ปีขึ้นไปจึงจะคอมเม้นได้ สัดส่วนวัยและความภักดีของ EP นี้จึงมาจากคนที่ล็อกอินเท่านั้น") : null,
+  ]);
+}
+
+// ---------- page: overview dashboard ----------
+function pageHome() {
+  DRAWS.length = 0;
+  const wrap = el("div", { class: "page" });
+  const render = () => { DRAWS.length = 0; wrap.replaceChildren(...homeBody(render)); requestAnimationFrame(runDraws); };
+  render();
+  return wrap;
+}
+function homeBody(rerender) {
+  const all = D.eps, eps = filtered();
+  const m = METRICS[MET];
+  const kp = [
+    tile("EP", String(eps.length), isFiltered() ? [`${Math.round(eps.length / all.length * 100)}% ของทั้งปี`, ""] : null, monthly(eps, "views", (x) => x.length)),
+    tile("วิวรวม", views(sum(eps.map((e) => e.views))), isFiltered() ? [`${Math.round(sum(eps.map((e) => e.views)) / sum(all.map((e) => e.views)) * 100)}% ของทั้งปี`, ""] : null, monthly(eps, "views", sum)),
+    tile("วิวต่อ EP", views(median(eps.map((e) => e.views))), deltaVs(median(eps.map((e) => e.views)), median(all.map((e) => e.views))), monthly(eps, "views", median), "ค่ากลาง"),
+    tile("คอมเม้นรวม", fmt(sum(eps.map((e) => e.comments))), isFiltered() ? [`${Math.round(sum(eps.map((e) => e.comments)) / sum(all.map((e) => e.comments)) * 100)}% ของทั้งปี`, ""] : null, monthly(eps, "comments", sum)),
+    tile("คอมเม้น/1,000 วิว", median(eps.map((e) => e.cr)).toFixed(2), deltaVs(median(eps.map((e) => e.cr)), median(all.map((e) => e.cr))), monthly(eps, "cr", median), "คอมเม้นต่อ 1,000 วิว"),
+    tile("ขาจร (คนใหม่) ต่อ EP", pct(median(eps.map((e) => e.drift))), deltaVs(median(eps.map((e) => e.drift)), median(all.map((e) => e.drift))), monthly(eps, "drift", median), "ขาจร"),
+  ];
+  const metSeg = el("div", { class: "seg" }, Object.entries(METRICS).map(([k, v]) => el("button", { type: "button", "aria-pressed": String(MET === k), onclick: () => { MET = k; rerender(); } }, v.name)));
+  // month chart
+  const monthChart = chartBox((box, W, H) => {
+    const vals = MONTHS.map((mm) => { const xs = D.eps.filter((e) => e.m === mm && (!F.cats.size || F.cats.has(e.cat))).map((e) => e[MET]); return xs.length ? (m.total ? sum(xs) : median(xs)) : 0; });
+    const pad = { l: 46, r: 8, t: 10, b: 24 }, mx = Math.max(...vals) * 1.1 || 1, ticks = niceTicks(mx);
+    const y = (v) => H - pad.b - v / ticks[ticks.length - 1] * (H - pad.t - pad.b), bw = (W - pad.l - pad.r) / MONTHS.length;
+    const svg = S("svg", { width: W, height: H, role: "img", "aria-label": `${m.name} รายเดือน` });
+    axisY(svg, y, W - pad.r, ticks, short, pad.l);
+    vals.forEach((v, i) => {
+      const on = i >= F.m0 && i <= F.m1, x = pad.l + i * bw + 3;
+      const r = S("rect", { x, y: y(v), width: Math.max(bw - 6, 2), height: Math.max(H - pad.b - y(v), 0), rx: 3, fill: on ? "var(--accent)" : "var(--l3)", class: "hit", tabindex: "0" });
+      r.addEventListener("click", () => { if (F.m0 === i && F.m1 === i) { F.m0 = 0; F.m1 = MONTHS.length - 1; } else { F.m0 = F.m1 = i; } rerender(); });
+      bindTip(r, `${mLabel(MONTHS[i])}: ${m.fmt(v)} ${m.total ? "(รวม)" : "(ค่ากลางต่อ EP)"} · กดเพื่อกรองเดือนนี้`);
+      svg.append(r, S("text", { x: x + (bw - 6) / 2, y: H - 6, "text-anchor": "middle", class: "ax" }, mLabel(MONTHS[i])));
+      const lab = m.total ? short(v) : m.fmt(v), fs = Math.min(11, (bw - 2) / (0.62 * lab.length));
+      if (v > 0 && fs >= 8) svg.append(S("text", { x: x + (bw - 6) / 2, y: Math.max(y(v) - 5, 9), "text-anchor": "middle", "font-size": fs.toFixed(1), class: "blab", opacity: on ? 1 : .55 }, lab));
+    });
+    box.append(svg);
+  }, 220);
+  // category chart
+  const cats = D.categories.map((c) => c.name);
+  const catChart = chartBox((box, W) => {
+    const rows = cats.map((c) => { const xs = D.eps.filter((e) => e.cat === c && inRange(e)).map((e) => e[MET]); return { c, v: xs.length ? (m.total ? median(xs) : median(xs)) : 0, n: xs.length }; }).sort((a, b) => b.v - a.v);
+    const rh = 26, H = rows.length * rh + 6, lw = Math.min(160, W * .42), mx = Math.max(...rows.map((r) => r.v)) || 1;
+    const svg = S("svg", { width: W, height: H, role: "img", "aria-label": "เทียบหมวด" });
+    rows.forEach((r, i) => {
+      const on = !F.cats.size || F.cats.has(r.c), w = (W - lw - 64) * r.v / mx, yy = i * rh + 4;
+      const g = S("g", { class: "hit", tabindex: "0" });
+      g.append(S("rect", { x: 0, y: yy - 2, width: W, height: rh, fill: "transparent" }),
+        S("text", { x: lw - 8, y: yy + 14, "text-anchor": "end", class: on ? "lbl" : "lbl dim" }, r.c.length > 22 ? r.c.slice(0, 21) + "…" : r.c),
+        S("rect", { x: lw, y: yy + 3, width: Math.max(w, 1), height: rh - 10, rx: 3, fill: on ? "var(--accent)" : "var(--l3)" }),
+        S("text", { x: lw + w + 6, y: yy + 14, class: "val" }, m.fmt(r.v)));
+      g.addEventListener("click", () => { F.cats.has(r.c) ? F.cats.delete(r.c) : F.cats.add(r.c); rerender(); });
+      bindTip(g, `${r.c}: ${m.fmt(r.v)} (ค่ากลางต่อ EP, ${r.n} EP) · กดเพื่อกรอง`);
+      svg.append(g);
+    });
+    box.style.height = H + "px"; box.append(svg);
+  }, 270);
+  // scatter
+  const scatter = chartBox((box, W, H) => {
+    const pad = { l: 40, r: 10, t: 10, b: 28 };
+    const xs = D.eps.map((e) => Math.log10(e.views)), x0 = Math.floor(Math.min(...xs) * 2) / 2, x1 = Math.ceil(Math.max(...xs) * 2) / 2;
+    const y1 = Math.ceil(Math.max(...D.eps.map((e) => e.cr))), x = (v) => pad.l + (Math.log10(v) - x0) / (x1 - x0) * (W - pad.l - pad.r), y = (v) => H - pad.b - v / y1 * (H - pad.t - pad.b);
+    const svg = S("svg", { width: W, height: H, role: "img", "aria-label": "EP แต่ละอัน วิวเทียบกับคอมเม้นต่อ 1,000 วิว" });
+    axisY(svg, y, W - pad.r, niceTicks(y1, 4).filter((t) => t <= y1), (t) => t, pad.l);
+    [1e5, 3e5, 1e6, 3e6, 1e7].filter((v) => Math.log10(v) >= x0 && Math.log10(v) <= x1).forEach((v) => svg.append(S("text", { x: x(v), y: H - 8, "text-anchor": "middle", class: "ax" }, short(v))));
+    const bx = median(D.eps.map((e) => e.views)), by = median(D.eps.map((e) => e.cr));
+    svg.append(S("line", { x1: x(bx), x2: x(bx), y1: pad.t, y2: H - pad.b, stroke: "var(--ink-3)", "stroke-dasharray": "3 3" }), S("line", { x1: pad.l, x2: W - pad.r, y1: y(by), y2: y(by), stroke: "var(--ink-3)", "stroke-dasharray": "3 3" }));
+    svg.append(S("text", { x: W - pad.r, y: pad.t + 10, "text-anchor": "end", class: "ax" }, "วิวสูง · คนคอมเม้นเยอะ"));
+    const sel = new Set(eps.map((e) => e.ep));
+    [...D.eps].sort((a, b) => sel.has(a.ep) - sel.has(b.ep)).forEach((e) => {
+      const on = sel.has(e.ep), c = S("circle", { cx: x(e.views), cy: y(Math.min(e.cr, y1)), r: on ? 4.5 : 3, fill: on ? "var(--accent)" : "var(--l3)", stroke: "var(--surface)", "stroke-width": 1.5, class: "hit", tabindex: on ? "0" : null });
+      bindTip(c, `EP.${e.ep} ${e.title.slice(0, 50)} · ${views(e.views)} วิว · ${e.cr} คอมเม้น/1,000 วิว`);
+      c.addEventListener("click", () => epModal(e)); svg.append(c);
+    });
+    box.append(svg);
+  }, 280);
+  // gen + loyalty of the filtered EPs (people-weighted)
+  const pw = sum(eps.map((e) => e.people)) || 1;
+  const genMix = Object.fromEntries(GENS.map((g) => [g, sum(eps.filter((e) => e.gen).map((e) => e.gen[g] * e.people)) / pw]));
+  const loy = { "แฟนตัวยง": median(eps.map((e) => e.fan)), "นักเสพข่าว": median(eps.map((e) => e.news)), "ขาจร": median(eps.map((e) => e.drift)) };
+  // top EP table
+  const top = [...eps].sort((a, b) => b[MET] - a[MET]).slice(0, 8);
+  const more = contentBody(rerender).slice(1);
+  return [
+    el("div", { class: "dash-head" }, el("div", null, el("span", { class: "eyebrow" }, "ภาพรวม"), el("h1", null, "Dashboard คนคอมเม้นโหนกระแส")), el("span", { class: "small muted" }, `${D.n_eps} EP · ${D.date_range[0]} ถึง ${D.date_range[1]}`)),
+    el("a", { class: "start", href: "#planner" }, el("span", { class: "start-ico" }, icon("M4 4h16v16H4zM8 9h8M8 13h5M15 15l2 2 3-4")), el("span", null, el("b", null, "มีโจทย์ลูกค้า? เริ่มที่นี่"), el("span", { class: "cap" }, "กรอกสินค้า กลุ่มเป้าหมาย และงาน แล้วได้รายงานข้อเสนอพร้อม Export PDF")), el("span", { class: "start-go" }, "วางแผนแคมเปญ →")),
+    filterBar(rerender),
+    el("div", { class: "tiles" }, kp),
+    el("div", { class: "dgrid" },
+      el("div", { class: "panel span8" }, el("div", { class: "panel-head" }, el("h2", null, `${m.name}รายเดือน`), metSeg), monthChart, el("p", { class: "cap" }, m.total ? "ผลรวมต่อเดือน · กดแท่งเพื่อกรองเดือน" : "ค่ากลางต่อ EP · กดแท่งเพื่อกรองเดือน")),
+      el("div", { class: "panel span4" }, el("div", { class: "panel-head" }, el("h2", null, "ใครคอมเม้น"), el("button", { class: "qbtn", type: "button", "aria-label": "Gen คืออะไร", onclick: () => openGloss("Gen") }, "?")),
+        el("span", { class: "cap" }, "วัย (ประเมิน)"), stack(GENS.map((g) => ({ label: g, value: genMix[g], color: GCOL[g] }))),
+        el("div", { class: "mini3" }, GENS.map((g) => el("div", null, el("b", { class: "num" }, pct(genMix[g])), el("span", { class: "cap" }, g)))), el("span", { class: "cap" }, GEN_CAP),
+        el("span", { class: "cap" }, "ความภักดี (ค่ากลางต่อ EP)"), loyStack(loy),
+        el("div", { class: "mini3" }, LOY.map((l) => el("div", null, el("b", { class: "num" }, pct(loy[l])), el("span", { class: "cap" }, l))))),
+      el("div", { class: "panel span5" }, el("div", { class: "panel-head" }, el("h2", null, "เทียบหมวด"), el("span", { class: "cap" }, METRICS[MET].per)), catChart),
+      el("div", { class: "panel span7" }, el("div", { class: "panel-head" }, el("h2", null, "EP ทุกอัน"), el("span", { class: "cap" }, "แนวนอน = วิว · แนวตั้ง = คอมเม้นต่อ 1,000 วิว")), scatter, el("p", { class: "cap" }, "เส้นประ = ค่ากลางทั้งปี · กดจุดเพื่อดู EP")),
+      el("div", { class: "panel span12" }, el("div", { class: "panel-head" }, el("h2", null, `EP เด่นตาม${m.name}`), el("span", { class: "cap" }, "กดปกเพื่อดูรายละเอียด")),
+        el("div", { class: "covers" }, top.slice(0, 6).map((e) => el("button", { type: "button", class: "cover", onclick: () => epModal(e) }, el("span", { class: "cover-img" }, thumb(e.vid, "cover-thumb"), el("span", { class: "cover-badge num" }, m.fmt(e[MET]))),
+          el("span", { class: "cover-t" }, el("b", null, `EP.${e.ep} `), e.title, age18(e.ep)), el("span", { class: "cap" }, `${e.cat} · ${e.date}`))))),
+      el("div", { class: "panel span12" }, el("div", { class: "panel-head" }, el("h2", null, `EP ที่${m.name}สูงสุด`), el("span", { class: "cap" }, `${eps.length} EP ตามตัวกรอง`)),
+        el("div", { class: "tbl-wrap" }, el("table", null,
+          el("thead", null, el("tr", null, ["EP", "หมวด", "วิว", "คอมเม้น", "คอมเม้น/1,000 วิว", "ขาจร", "แฟนตัวยง"].map((h, i) => el("th", { style: i === 1 ? "text-align:left" : null }, h)))),
+          el("tbody", null, top.map((e) => el("tr", { class: "click", tabindex: "0", onclick: () => epModal(e), onkeydown: (ev) => { if (ev.key === "Enter") epModal(e); } },
+            el("td", { class: "eptitle" }, thumb(e.vid), el("b", null, `EP.${e.ep} `), e.title.slice(0, 48), age18(e.ep)), el("td", { style: "text-align:left" }, el("span", { class: "chip" }, e.cat)),
+            el("td", null, views(e.views)), el("td", null, fmt(e.comments)), el("td", null, e.cr.toFixed(1)), el("td", null, pct(e.drift)), el("td", null, pct(e.fan))))))))),
+    el("div", { class: "dash-head", id: "detail" }, el("h2", null, "ข้อมูลละเอียด: หมวดและ EP")),
+    ...more,
+    limits(["commenters", "asOf", "time", "age18", "missing", "tags", "fewEps"]),
+  ];
+}
+
+// ---------- business pages (readme/01_business.md goals) ----------
+const SENSITIVE = { "คดีทางเพศ/อนาจาร": "สูง", "มีคนเสียชีวิต": "สูง", "ยาเสพติด": "สูง", "ทำร้ายร่างกาย": "กลาง", "เด็ก": "กลาง", "ภัยพิบัติ": "กลาง" };
+const tagRows = () => D.tags.filter((t) => !t.few_eps);
+function copyBtn(textFn, label = "คัดลอกไป Proposal") {
+  const b = el("button", { type: "button", class: "btn" }, icon("M8 8h11v11H8zM5 16V5h11"), label);
+  b.addEventListener("click", () => {
+    const t = textFn(); const done = () => { b.lastChild.textContent = "คัดลอกแล้ว"; setTimeout(() => (b.lastChild.textContent = label), 1600); };
+    try { navigator.clipboard.writeText(t).then(done, () => fallback(t)); } catch (e) { fallback(t); }
+    function fallback(t) { openModal("คัดลอกข้อความนี้", el("textarea", { class: "copybox", rows: "8", readonly: true }, t)); }
+  });
+  return b;
+}
+const SRC = "ที่มา: ReachRadar วิเคราะห์คนคอมเม้นบน YouTube โหนกระแส ปี 2569 (ไม่ใช่ผู้ชมทั้งหมด) · Gen เป็นค่าประเมินจากข้อความ ใช้ดูทิศทาง คนที่ประเมินไม่ได้นับเป็น \"ไม่ระบุ\" และไม่รวมในสัดส่วน · การจัดหมวด EP ตรงกับที่นักวิเคราะห์จัด 87% (Cohen's kappa 0.85)";
+
+// ---------- network graph: Gen × สาย × ประเด็น × หมวดสินค้า ----------
+const NET_MIN = 1.15;                                     // นับเป็นเส้นเมื่อคอมเม้นมากกว่าที่ออกอากาศ 15% ขึ้นไป
+const NCOL = { gen: "var(--gy)", sai: "var(--accent)", cat: "var(--up)", prod: "var(--good)" };
+const ncut = (t) => (t.length > 16 ? t.slice(0, 15) + "…" : t);
+const NTYPE = { gen: "วัย", sai: "สายความสนใจ", cat: "ประเด็น", prod: "หมวดสินค้า" };
+function netModel(gen) {
+  const nodes = [], edges = [], at = new Map();
+  const N = (id, label, type, size, tipText, full) => { at.set(id, nodes.length); nodes.push({ id, label, type, size, tip: tipText, full, deg: 0, wdeg: 0 }); };
+  const E = (a, b, s, tipText) => { if (!at.has(a) || !at.has(b)) return; edges.push({ a: at.get(a), b: at.get(b), s, tip: tipText }); };
+  GENS.forEach((g) => N("g:" + g, g.replace("Gen ", "").replace(" ขึ้นไป", "+"), "gen", D.overall.gen_pct[g] / 100, `${g} · ${pct(D.overall.gen_pct[g])} ของคนคอมเม้นทั้งหมด`, g));
+  const pmax = Math.max(...D.communities.map((c) => c.people));
+  D.communities.forEach((c) => N("s:" + c.name, ncut(c.name.replace("สาย", "")), "sai", c.people / pmax, `${c.name} · ${fmt(c.people)} คน (${pct(c.pct)} ของขาประจำ) · วัย: ${GENS.map((g) => g.replace("Gen ", "") + " " + pct(c[g + " (model)"])).join(" · ")}`, c.name));
+  const emax = Math.max(...D.categories.map((c) => c.eps));
+  D.categories.forEach((c) => { if (D.communities.some((m) => m.lift[c.name] >= NET_MIN)) N("c:" + c.name, ncut(c.name.split(" & ")[0]), "cat", c.eps / emax, `${c.name} · ${c.eps} EP · ${views(c.views)} วิวค่ากลาง · ${gen} ${pct(c.gen[gen])} (${x2(c.gen_lift[gen])} ของปกติ)`, c.name); });
+  PRODUCTS.forEach((p) => N("p:" + p.id, ncut(p.name.split(" / ")[0]), "prod", .45, `หมวดสินค้า ${p.name} · เสนอขายกับคน${p.sai.join(" และคน")}`, p.name));
+  D.communities.forEach((c) => {
+    GENS.forEach((g) => { const sh = c[g + " (model)"]; if (sh >= 10) E("g:" + g, "s:" + c.name, sh / 100, `คน${c.name} เป็น ${g} ราว ${pct(sh)} (${fmt(Math.round(c.people * sh / 100))} คน · ${x2(sh / D.overall.gen_pct[g])} ของสัดส่วนปกติ)`); });
+    D.categories.forEach((k) => { const v = c.lift[k.name]; if (v >= NET_MIN) E("s:" + c.name, "c:" + k.name, Math.min((v - 1) / 2.2, 1), `คน${c.name} คอมเม้นหมวด${k.name} ${x2(v)} ของสัดส่วนที่ออกอากาศ`); });
+  });
+  PRODUCTS.forEach((p) => p.sai.forEach((n) => E("s:" + n, "p:" + p.id, .42, `${p.name} เข้ากับคน${n}`)));
+  edges.forEach((e) => { nodes[e.a].wdeg += e.s; nodes[e.b].wdeg += e.s; nodes[e.a].deg++; nodes[e.b].deg++; });
+  const wmax = Math.max(...nodes.map((n) => n.wdeg)) || 1;
+  nodes.forEach((n) => (n.size = n.wdeg / wmax));                 // ขนาดจุด = ความสำคัญในเครือข่าย (weighted degree)
+  return { nodes, edges };
+}
+function netLayout(g, W, H) {
+  const col = { gen: .07, sai: .33, cat: .67, prod: .93 }, order = ["gen", "sai", "cat", "prod"];
+  const lay = order.map((ty) => g.nodes.filter((d) => d.type === ty));
+  lay.forEach((L, li) => L.forEach((d, k) => { d.x = W * col[order[li]]; d.y = (k + .5) / L.length; }));
+  const adj = g.nodes.map(() => []);
+  g.edges.forEach((e) => { adj[e.a].push(e.b); adj[e.b].push(e.a); });
+  const idx = new Map(g.nodes.map((d, i) => [d, i]));
+  for (let pass = 0; pass < 24; pass++) {                        // barycenter: ดึงจุดไปอยู่ใกล้เพื่อนบ้าน ลดเส้นตัดกัน
+    const dir = pass % 2 ? [...lay].reverse() : lay;
+    for (const L of dir) {
+      L.forEach((d) => { const nb = adj[idx.get(d)]; if (nb.length) d.b = nb.reduce((s, j) => s + g.nodes[j].y, 0) / nb.length; else d.b = d.y; });
+      L.sort((p, q) => p.b - q.b || p.id.localeCompare(q.id));
+      L.forEach((d, k) => (d.y = (k + .5) / L.length));
+    }
+  }
+  const pl = 94, pr = 70, pt = 22, pb = 34, gap = 34;            // เว้นขอบให้ชื่อ และเว้นระยะจุดในชั้นเดียวกัน
+  const inner = Math.max(H - pt - pb, 1);
+  lay.forEach((L) => { const step = Math.min(inner / Math.max(L.length - 1, 1), Math.max(gap, inner / 5));
+    const span = step * (L.length - 1), y0 = pt + (inner - span) / 2;
+    L.forEach((d, k) => (d.y = L.length === 1 ? H / 2 : y0 + k * step)); });
+  const xs = g.nodes.map((d) => d.x), x0 = Math.min(...xs), x1 = Math.max(...xs);
+  const sx = (W - pl - pr) / Math.max(x1 - x0, 1);
+  g.nodes.forEach((d) => (d.x = pl + (d.x - x0) * sx));
+}
+function drawNet(host, W, H, g, startId) {
+  if (!W || !H) return;
+  const VW = Math.max(W, 640);                                   // จอแคบ: ให้เลื่อนดูข้างได้ ไม่บีบจนอ่านไม่ออก
+  netLayout(g, VW, H);
+  const svg = S("svg", { width: VW, height: H, role: "img", "aria-label": "แผนผังเครือข่าย วัย สายความสนใจ ประเด็น และหมวดสินค้า" });
+  const gl = S("g"), gn = S("g"); svg.append(gl, gn);
+  const eEl = g.edges.map((e) => {
+    const a = g.nodes[e.a], b = g.nodes[e.b], soft = a.type === "prod" || b.type === "prod";
+    const my = (a.y + b.y) / 2, bow = soft ? (my >= H / 2 ? 1 : -1) * Math.min(26, Math.abs(b.x - a.x) * .07) : 0;
+    const dd = soft ? `M${a.x},${a.y}Q${(a.x + b.x) / 2},${my + bow} ${b.x},${b.y}` : `M${a.x},${a.y}L${b.x},${b.y}`;
+    const ln = S("path", { d: dd, fill: "none", stroke: soft ? "var(--good)" : "var(--ink-3)",
+      "stroke-width": (1 + e.s * 4.2).toFixed(2), "stroke-dasharray": soft ? "4 4" : null, "stroke-linecap": "round", "stroke-opacity": .45 });
+    bindTip(ln, e.tip); gl.append(ln); return ln;
+  });
+  const nEl = g.nodes.map((d) => {
+    const r = 7 + Math.sqrt(d.size) * 11, col = d.type === "gen" ? GCOL[d.full] : NCOL[d.type];
+    const c = S("circle", { cx: d.x, cy: d.y, r: r.toFixed(1), fill: col, "fill-opacity": .9, stroke: "var(--surface)", "stroke-width": 2 });
+    const left = d.type === "gen";
+    const tx = S("text", { x: left ? d.x - r - 6 : d.x, y: left ? d.y + 5 : d.y + r + 13, "text-anchor": left ? "end" : "middle",
+      class: "lbl", stroke: "var(--surface)", "stroke-width": 3.5, "paint-order": "stroke", fill: "var(--ink)" }, left ? d.full.replace(" ขึ้นไป", "+") : d.label);
+    const grp = S("g", { class: "hit", tabindex: "0", role: "button", "aria-label": d.full }, c, tx);
+    bindTip(grp, d.tip);
+    grp.addEventListener("click", (ev) => { ev.stopPropagation(); setFocus(d.id === cur ? startId : d.id); });
+    grp.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setFocus(d.id === cur ? startId : d.id); } });
+    gn.append(grp); return { grp, c, tx, r };
+  });
+  let cur = startId;
+  function setFocus(id) {
+    cur = id;
+    const si = g.nodes.findIndex((n) => n.id === id), home = id === startId;   // วัยที่เลือกไว้ = เห็นทั้งสาย วัยอื่นจาง
+    const near = new Set([si]);
+    if (!home) g.edges.forEach((e) => { if (e.a === si) near.add(e.b); if (e.b === si) near.add(e.a); });
+    const onNode = (n, i) => home ? !(n.type === "gen" && i !== si) : near.has(i);
+    g.nodes.forEach((n, i) => { nEl[i].grp.setAttribute("opacity", onNode(n, i) ? 1 : .15);
+      nEl[i].c.setAttribute("stroke", i === si ? "var(--ink)" : "var(--surface)");
+      nEl[i].c.setAttribute("stroke-width", i === si ? 3 : 2); });
+    g.edges.forEach((e, i) => { const on = home ? onNode(g.nodes[e.a], e.a) && onNode(g.nodes[e.b], e.b) : (e.a === si || e.b === si);
+      eEl[i].setAttribute("stroke-opacity", on ? .72 : .06); });
+  }
+  svg.addEventListener("click", () => setFocus(startId));
+  setFocus(startId);
+  host.append(svg);
+}
+function netPanel(gen) {
+  const g = netModel(gen);
+  const top = [...g.nodes].sort((a, b) => b.wdeg - a.wdeg).slice(0, 6);
+  return el("div", { class: "panel span12" },
+    el("div", { class: "panel-head" }, el("h2", null, "แผนผังเครือข่าย: วัย → สายความสนใจ → ประเด็น → หมวดสินค้า"),
+      el("span", { class: "cap" }, `${g.nodes.length} จุด · ${g.edges.length} เส้น · กดจุดเพื่อดูเฉพาะสิ่งที่ต่อกับจุดนั้น · กดพื้นที่ว่างเพื่อกลับมาที่ ${gen}`)),
+    el("div", { class: "legend" },
+      el("span", null, el("i", { style: `background:${GCOL[gen]}` }), "วัย (Gen)"),
+      el("span", null, el("i", { style: "background:var(--accent)" }), "สายความสนใจ"),
+      el("span", null, el("i", { style: "background:var(--up)" }), "ประเด็นที่ออกอากาศ"),
+      el("span", null, el("i", { style: "background:var(--good)" }), "หมวดสินค้า (เส้นประ)")),
+    el("div", { class: "tbl-wrap" }, chartBox((host, W, H) => drawNet(host, W, H, g, "g:" + gen), 440)),
+    el("p", { class: "cap" }, "เส้นวัย–สาย = สัดส่วนวัยในสายนั้น · เส้นสาย–ประเด็น = คอมเม้นมากกว่าสัดส่วนที่ออกอากาศตั้งแต่ 1.15 เท่า (เส้นยิ่งหนายิ่งมากกว่าปกติ) · เส้นประสาย–หมวดสินค้า = ข้อเสนอขายที่เข้ากัน"),
+    el("div", { class: "tbl-wrap" }, el("table", null,
+      el("thead", null, el("tr", null, el("th", { style: "text-align:left" }, "จุดที่เป็นศูนย์กลางที่สุด"), el("th", null, "ชนิด"), el("th", null, "จำนวนเส้น (degree)"), el("th", null, "น้ำหนักรวม (weighted degree)"))),
+      el("tbody", null, top.map((n) => el("tr", null, el("td", { style: "text-align:left" }, n.full), el("td", null, NTYPE[n.type]), el("td", { class: "num" }, n.deg), el("td", { class: "num" }, n.wdeg.toFixed(2))))))),
+    el("p", { class: "note" }, `อ่านอย่างนี้: เลือกวัยที่แบรนด์อยากได้ แล้วไล่เส้นจากจุดวัยไปยังสายความสนใจที่หนาที่สุด ต่อไปยังประเด็นที่สายนั้นคอมเม้นมากกว่าปกติ แล้วจบที่หมวดสินค้าที่เข้ากัน · เป็นเครือข่าย 4 ชนิดจุด (4-mode) จัดเรียงเป็นชั้นจากซ้ายไปขวา สลับลำดับในแต่ละชั้นด้วยวิธี barycenter เพื่อให้เส้นตัดกันน้อยที่สุด และวัดความสำคัญด้วย degree กับ weighted degree`));
+}
+
+// 1) Brand match: which category / subtopic over-indexes for a Gen
+let MG = "Gen Y";
+function pageMatch() {
+  const wrap = el("div", { class: "page" });
+  const render = () => { DRAWS.length = 0; wrap.replaceChildren(...matchBody(render)); requestAnimationFrame(runDraws); };
+  render(); return wrap;
+}
+function matchBody(rerender) {
+  const o = D.overall;
+  const cats = [...D.categories].sort((a, b) => b.gen_lift[MG] - a.gen_lift[MG]);
+  const tags = tagRows().filter((t) => t.gen_lift).sort((a, b) => b.gen_lift[MG] - a.gen_lift[MG]);
+  const best = cats[0], bestTag = tags[0];
+  const liftCell = (v) => el("td", { class: "cell num", style: `background:${heatFill(v, 1.12)}` }, x2(v));
+  const proposal = () => `กลุ่มเป้าหมาย ${MG}\n- ภาพรวม: คนคอมเม้นเป็น ${MG} ราว ${pct(o.gen_pct[MG])} (ช่วงที่น่าจะเป็น ${o.gen_ci[MG][0]}–${o.gen_ci[MG][1]}%)\n- หมวดที่ ${MG} มากกว่าปกติ: ${cats.slice(0, 3).map((c) => `${c.name} ${pct(c.gen[MG])} (${x2(c.gen_lift[MG])})`).join(", ")}\n- ประเด็นที่ ${MG} มากกว่าปกติ: ${tags.slice(0, 3).map((t) => `${t.tag} ${pct(t.gen[MG])} (${x2(t.gen_lift[MG])})`).join(", ")}\n- วิวค่ากลางต่อ EP ของหมวดอันดับ 1: ${views(best.views)}\n${SRC}`;
+  return [
+    el("div", { class: "dash-head" }, el("div", null, el("span", { class: "eyebrow" }, "เป้าหมาย 1 · จับคู่แบรนด์กับคอนเทนต์"), el("h1", null, "แบรนด์อยากได้ Gen ไหน ลงหมวดไหนดี")), el("div", { class: "head-r" }, el("span", { class: "chip" }, "ข้อมูลทั้งปี · ตัวกรองหน้าภาพรวมไม่มีผลที่หน้านี้"))),
+    el("div", { class: "callout" }, el("b", null, "อ่านก่อนใช้: "), "วัยของคนดูแต่ละหมวดต่างกันไม่มาก (สูงสุดราว ±10%) ใช้เป็นตัวช่วยเท่านั้น สิ่งที่แยกคนดูได้ชัดกว่าคือ ", el("a", { href: "#audience" }, "สายความสนใจ"), " ซึ่งต่างกันได้ถึง 3 เท่า เช่น คนสายดราม่าคนดังแทบไม่คอมเม้นเรื่องครอบครัว"),
+    el("div", { class: "fbar" }, el("span", { class: "flabel" }, "กลุ่มเป้าหมาย"), el("div", { class: "seg" }, GENS.map((g) => el("button", { type: "button", "aria-pressed": String(MG === g), onclick: () => { MG = g; rerender(); } }, el("i", { class: "dot", style: `background:${GCOL[g]}` }), g))),
+      el("button", { class: "qbtn", type: "button", "aria-label": "Gen คืออะไร", onclick: () => openGloss("Gen") }, "?")),
+    el("div", { class: "tiles" },
+      tile(`${MG} ในภาพรวม`, pct(o.gen_pct[MG]), [`ช่วงที่น่าจะเป็น ${o.gen_ci[MG][0]}–${o.gen_ci[MG][1]}%`, ""]),
+      tile("หมวดอันดับ 1", best.name, [`${MG} ${pct(best.gen[MG])} · ${x2(best.gen_lift[MG])} ของปกติ`, best.gen_lift[MG] >= 1.03 ? "up" : ""]),
+      tile("ประเด็นอันดับ 1", bestTag.tag, [`${MG} ${pct(bestTag.gen[MG])} · ${x2(bestTag.gen_lift[MG])} ของปกติ`, bestTag.gen_lift[MG] >= 1.03 ? "up" : ""]),
+      tile("กลุ่มนี้ส่วนใหญ่เป็น", Object.entries(D.gen_x_loy[MG]).sort((a, b) => b[1] - a[1])[0][0], [`${fmt(Object.values(D.gen_x_loy[MG]).reduce((s, v) => s + v, 0))} คนโดยประมาณ`, ""])),
+    el("p", { class: "note" }, GEN_NOTE),
+    el("div", { class: "dgrid" }, netPanel(MG)),
+    el("div", { class: "dgrid" },
+      el("div", { class: "panel span5" }, el("div", { class: "panel-head" }, el("h2", null, "หมวด × Gen"), el("span", { class: "cap" }, `เรียงตาม ${MG} · +4% = มากกว่าภาพรวม 4%`)),
+        el("div", { class: "tbl-wrap" }, el("table", { class: "heat" },
+          el("thead", null, el("tr", null, el("th", { style: "text-align:left" }, "หมวด"), el("th", null, `${MG.replace("Gen ", "").replace(" ขึ้นไป", "+")} %`), GENS.map((g) => el("th", { class: g === MG ? "sel" : null }, g.replace("Gen ", "").replace(" ขึ้นไป", "+") + " lift")))),
+          el("tbody", null, cats.map((c) => el("tr", { class: "click", tabindex: "0", onclick: () => catModal(c) }, el("td", { style: "text-align:left" }, c.name), el("td", { class: "num" }, pct(c.gen[MG])), GENS.map((g) => liftCell(c.gen_lift[g])))))))),
+      el("div", { class: "panel span7" }, el("div", { class: "panel-head" }, el("h2", null, "ประเด็นย่อย × Gen"), el("span", { class: "cap" }, "ประเด็นที่มีตั้งแต่ 3 EP")),
+        el("div", { class: "tbl-wrap scrolly" }, el("table", { class: "heat" },
+          el("thead", null, el("tr", null, el("th", { style: "text-align:left" }, "ประเด็น"), el("th", null, "EP"), el("th", null, `${MG.replace("Gen ", "").replace(" ขึ้นไป", "+")} %`), GENS.map((g) => el("th", { class: g === MG ? "sel" : null }, g.replace("Gen ", "").replace(" ขึ้นไป", "+") + " lift")))),
+          el("tbody", null, tags.map((t) => el("tr", null, el("td", { style: "text-align:left" }, t.tag, SENSITIVE[t.tag] ? el("span", { class: "chip warn", style: "margin-left:6px" }, "อ่อนไหว") : null), el("td", { class: "num" }, t.eps), el("td", { class: "num" }, pct(t.gen[MG])), GENS.map((g) => liftCell(t.gen_lift[g])))))))),
+    ),
+    el("p", { class: "note" }, "ความต่างระหว่างหมวดมีขนาดเล็ก (×0.86–×1.08) ใช้บอกทิศทางว่าหมวดไหนเอียงไปทาง Gen ใด ไม่ใช่ตัวเลขชี้ขาด"),
+    genAccuracy(),
+    limits(["genEstimate", "genBias", "commenters", "age18"]),
+  ];
+}
+function heatFill(v, span) { const t = Math.max(-1, Math.min(1, Math.log(v) / Math.log(span))); return t >= 0 ? `color-mix(in srgb, var(--up) ${Math.round(t * 70)}%, var(--surface))` : `color-mix(in srgb, var(--down) ${Math.round(-t * 70)}%, var(--surface))`; }
+
+// 2) Packages: Reach / Engagement / Loyalty
+function pagePackages() {
+  DRAWS.length = 0;
+  const B = D.base, tags = tagRows();
+  const packs = [
+    { id: "reach", name: "Reach", th: "เข้าถึงคนจำนวนมาก", rule: "วิวสูง และมีขาจร (คนใหม่) เยอะ", score: (t) => t.views * t.drift_pct / 100, show: (t) => `${views(t.views)} วิว · ขาจร ${pct(t.drift_pct)}` },
+    { id: "eng", name: "Engagement", th: "ให้คนมีส่วนร่วม", rule: "คอมเม้นต่อ 1,000 วิวสูง", score: (t) => t.comment_rate, show: (t) => `${t.comment_rate.toFixed(1)} คอมเม้น/1,000 วิว · ไลก์ ${t.like_rate}` },
+    { id: "loyal", name: "Loyalty", th: "ย้ำกับฐานแฟน", rule: "สัดส่วนแฟนตัวยงสูง", score: (t) => t.fan_pct, show: (t) => `แฟนตัวยง ${pct(t.fan_pct)} · ${views(t.views)} วิว` },
+  ];
+  const quad = chartBox((box, W, H) => {
+    const pad = { l: 44, r: 16, t: 14, b: 30 };
+    const x0 = Math.log10(Math.min(...tags.map((t) => t.views)) * .85), x1 = Math.log10(Math.max(...tags.map((t) => t.views)) * 1.15);
+    const y1 = Math.ceil(Math.max(...tags.map((t) => t.comment_rate)) + .3);
+    const x = (v) => pad.l + (Math.log10(v) - x0) / (x1 - x0) * (W - pad.l - pad.r), y = (v) => H - pad.b - v / y1 * (H - pad.t - pad.b);
+    const svg = S("svg", { width: W, height: H, role: "img", "aria-label": "ประเด็นย่อย วิวเทียบกับคอมเม้นต่อ 1,000 วิว" });
+    axisY(svg, y, W - pad.r, niceTicks(y1, 4).filter((t) => t <= y1), (t) => t, pad.l);
+    [5e5, 1e6, 2e6].forEach((v) => { if (Math.log10(v) > x0 && Math.log10(v) < x1) svg.append(S("text", { x: x(v), y: H - 10, "text-anchor": "middle", class: "ax" }, short(v))); });
+    svg.append(S("line", { x1: x(B.views), x2: x(B.views), y1: pad.t, y2: H - pad.b, stroke: "var(--ink-3)", "stroke-dasharray": "3 3" }), S("line", { x1: pad.l, x2: W - pad.r, y1: y(B.comment_rate), y2: y(B.comment_rate), stroke: "var(--ink-3)", "stroke-dasharray": "3 3" }));
+    [["Reach + Engagement", W - pad.r, pad.t + 10, "end"], ["Engagement", pad.l + 6, pad.t + 10, "start"], ["Reach", W - pad.r, H - pad.b - 6, "end"]].forEach(([t, xx, yy, a]) => svg.append(S("text", { x: xx, y: yy, "text-anchor": a, class: "ax q" }, t)));
+    tags.forEach((t) => {
+      const r = 4 + (t.fan_pct - 25) / 30 * 8, cx = x(t.views), cy = y(t.comment_rate);
+      const g = S("g", { class: "hit", tabindex: "0" }, S("circle", { cx, cy, r: Math.max(r, 3), fill: SENSITIVE[t.tag] ? "var(--l3)" : "var(--accent)", "fill-opacity": .75, stroke: "var(--surface)", "stroke-width": 1.5 }),
+        S("text", { x: cx + Math.max(r, 3) + 3, y: cy + 4, class: "lbl small-lbl" }, t.tag.split("/")[0]));
+      bindTip(g, `${t.tag}: ${views(t.views)} วิว · ${t.comment_rate} คอมเม้น/1,000 วิว · แฟนตัวยง ${pct(t.fan_pct)} (${t.eps} EP)${SENSITIVE[t.tag] ? " · ประเด็นอ่อนไหว" : ""}`);
+      svg.append(g);
+    });
+    box.append(svg);
+  }, 380);
+  const wrap = el("div", { class: "page" },
+    el("div", { class: "dash-head" }, el("div", null, el("span", { class: "eyebrow" }, "เป้าหมาย 3 · เลือกแพ็กเกจตามเป้าหมายแคมเปญ"), el("h1", null, "Reach · Engagement · Loyalty")), el("span", { class: "chip" }, "ข้อมูลทั้งปี · ตัวกรองหน้าภาพรวมไม่มีผลที่หน้านี้")),
+    el("div", { class: "dgrid" }, packs.map((p) => {
+      const top = [...tags].filter((t) => !SENSITIVE[t.tag] || SENSITIVE[t.tag] !== "สูง").sort((a, b) => p.score(b) - p.score(a)).slice(0, 6);
+      return el("div", { class: "panel span4 pack" }, el("div", { class: "panel-head" }, el("h2", null, p.name), el("span", { class: "chip" }, p.th)), el("span", { class: "cap" }, "เลือกจาก: " + p.rule),
+        el("ol", { class: "rank-list" }, top.map((t) => el("li", null, el("b", null, t.tag), el("span", { class: "cap" }, p.show(t)), SENSITIVE[t.tag] ? el("span", { class: "chip warn" }, "อ่อนไหว") : null))),
+        copyBtn(() => `แพ็กเกจ ${p.name} (${p.th})\n${top.slice(0, 4).map((t, i) => `${i + 1}. ${t.tag}: ${p.show(t)} (${t.eps} EP)`).join("\n")}\nค่ากลางทั้งรายการ: ${views(B.views)} วิว · ${B.comment_rate} คอมเม้น/1,000 วิว · แฟนตัวยง ${pct(B.fan)}\n${SRC}`));
+    }),
+      el("div", { class: "panel span12" }, el("div", { class: "panel-head" }, el("h2", null, "แผนที่ประเด็น"), el("span", { class: "cap" }, "แนวนอน = วิวต่อ EP · แนวตั้ง = คอมเม้นต่อ 1,000 วิว · วงใหญ่ = แฟนตัวยงเยอะ · สีเทา = ประเด็นอ่อนไหว")), quad,
+        el("p", { class: "cap" }, "เส้นประ = ค่ากลางทั้งรายการ ขวาบนคือประเด็นที่ได้ทั้งวิวและคนคอมเม้น"))),
+  );
+  requestAnimationFrame(runDraws);
+  wrap.append(limits(["tags", "fewEps", "commenters", "conv"]));
+  return wrap;
+}
+
+// 3) Slot pricing: series parts
+function pageSlots() {
+  const sp = D.series_parts, byPart = (k) => (p) => median(sp.filter((s) => (p === 3 ? s.part >= 3 : s.part === p)).map((s) => s[k]));
+  const v2 = byPart("v1")(2), c2 = byPart("c1")(2), v3 = byPart("v1")(3), c3 = byPart("c1")(3);
+  const series = [...new Set(sp.map((s) => s.series))].map((n) => ({ n, parts: sp.filter((s) => s.series === n).sort((a, b) => a.part - b.part) })).sort((a, b) => b.parts[0].views - a.parts[0].views);
+  const exc = series.filter((s) => s.parts.some((p) => p.part > 1 && p.v1 > 1));
+  const bar = (v, col) => el("span", { class: "inbar wide" }, el("i", { style: `width:${Math.min(v, 1.6) / 1.6 * 100}%;background:${col}` }));
+  const epDate = (ep) => (D.eps.find((x) => x.ep === ep) || {}).date || "";
+  const dShort = (d) => d ? +d.slice(8, 10) + " " + TH_M[+d.slice(5, 7) - 1] : "–";
+  const sRange = (s) => { const ds = s.parts.map((x) => epDate(x.ep)).filter(Boolean).sort(); if (!ds.length) return ""; const a = ds[0], b = ds[ds.length - 1]; return "ออนแอร์ " + (a === b ? dShort(a) : dShort(a) + " – " + dShort(b)) + " " + (+a.slice(0, 4) + 543); };
+  return el("div", { class: "page" },
+    el("div", { class: "dash-head" }, el("div", null, el("span", { class: "eyebrow" }, "เป้าหมาย 2 · ตั้งราคา Slot"), el("h1", null, "ตอนไหนมีมูลค่าสูง"))),
+    el("div", { class: "tiles" },
+      tile("วิวซีรีส์ ต่อ EP", views(D.series_views), [`เรื่องเดียวจบ ${views(D.single_views)} (×${(D.series_views / D.single_views).toFixed(2)})`, "up"]),
+      tile("ตอนที่ 2 เทียบตอนแรก", Math.round(v2 * 100) + "% วิว", [`คอมเม้น ${Math.round(c2 * 100)}%`, "down"]),
+      tile("ตอนที่ 3+ เทียบตอนแรก", Math.round(v3 * 100) + "% วิว", [`คอมเม้น ${Math.round(c3 * 100)}%`, "down"]),
+      tile("ซีรีส์ที่ตอนหลังแรงกว่า", String(exc.length), ["ส่วนใหญ่มีคู่กรณีมาเผชิญหน้า", ""])),
+    el("div", { class: "dgrid" },
+      el("div", { class: "panel span12" }, el("div", { class: "panel-head" }, el("h2", null, `${series.length} ซีรีส์ ปี 2569`), el("span", { class: "cap" }, "แต่ละตอนเทียบกับตอนแรก (100%) · แท่งน้ำเงิน = วิว · แท่งส้ม = คอมเม้น")),
+        el("div", { class: "tbl-wrap" }, el("table", null,
+          el("thead", null, el("tr", null, el("th", null, "ซีรีส์"), el("th", null, "ตอน"), el("th", null, "EP"), el("th", { style: "text-align:left" }, "ออนแอร์"), el("th", null, "วิว"), el("th", { style: "text-align:left" }, "วิว เทียบตอนแรก"), el("th", { style: "text-align:left" }, "คอมเม้น เทียบตอนแรก"))),
+          el("tbody", null, series.flatMap((s) => s.parts.map((p, i) => el("tr", { class: p.part > 1 && p.v1 > 1 ? "hl" : null },
+            el("td", null, i === 0 ? [el("b", null, s.n), el("span", { class: "cap sub" }, sRange(s))] : ""), el("td", null, p.part), el("td", { class: "eptitle" }, thumb((D.eps.find((x) => x.ep === p.ep) || {}).vid), "EP." + p.ep), el("td", { style: "text-align:left", class: "nowrap" }, dShort(epDate(p.ep))), el("td", null, views(p.views)),
+            el("td", { style: "text-align:left" }, bar(p.v1, "var(--accent)"), Math.round(p.v1 * 100) + "%"),
+            el("td", { style: "text-align:left" }, bar(p.c1, "var(--up)"), Math.round(p.c1 * 100) + "%"))))))),
+        el("p", { class: "cap" }, "แถวที่ไฮไลต์ = ตอนหลังได้วิวมากกว่าตอนแรก")),
+    ),
+    el("p", { class: "note" }, "ข้อเสนอขาย: ตั้งราคาตอนแรกของซีรีส์สูงสุด ขายตอนต่อไปเป็นแพ็กเกจลดราคา ยกเว้นตอนที่รู้ล่วงหน้าว่าคู่กรณีจะมาเผชิญหน้ากัน"),
+    limits(["asOf", "commenters", "missing"]),
+  );
+}
+
+// 4) Brand safety
+let SAFE_HIDE = new Set(["สูง"]);
+function pageSafety() {
+  const wrap = el("div", { class: "page" });
+  const render = () => wrap.replaceChildren(...safetyBody(render));
+  render(); return wrap;
+}
+function safetyBody(rerender) {
+  const isOut = (e) => e.tags.some((t) => SENSITIVE[t] && SAFE_HIDE.has(SENSITIVE[t]));
+  const sens = Object.entries(SENSITIVE).map(([t, lv]) => { const eps = D.eps.filter((e) => e.tags.includes(t)); return { t, lv, eps, n: eps.length, v: median(eps.map((e) => e.views)), cr: median(eps.map((e) => e.cr)) }; }).sort((a, b) => b.n - a.n);
+  const keep = D.eps.filter((e) => !isOut(e));
+  const cats = D.categories.map((c) => { const all = D.eps.filter((e) => e.cat === c.name), ok = all.filter((e) => !isOut(e)); return { c: c.name, all: all.length, ok: ok.length }; }).sort((a, b) => b.all - a.all);
+  return [
+    el("div", { class: "dash-head" }, el("div", null, el("span", { class: "eyebrow" }, "เป้าหมาย 4 · Brand safety"), el("h1", null, "ประเด็นอ่อนไหว ให้แบรนด์เลือกเอง")), el("span", { class: "chip" }, "ข้อมูลทั้งปี · ตัวกรองหน้าภาพรวมไม่มีผลที่หน้านี้")),
+    el("div", { class: "fbar" }, el("span", { class: "flabel" }, "ตัด EP ที่มีประเด็นระดับ"), el("div", { class: "seg" }, [["ไม่ตัด", []], ["อ่อนไหวสูง", ["สูง"]], ["สูง + กลาง", ["สูง", "กลาง"]]].map(([n, set]) => el("button", { type: "button", "aria-pressed": String(SAFE_HIDE.size === set.length), onclick: () => { SAFE_HIDE = new Set(set); rerender(); } }, n))),
+      el("span", { class: "cap" }, "สูง = คดีทางเพศ มีคนเสียชีวิต ยาเสพติด · กลาง = ทำร้ายร่างกาย เด็ก ภัยพิบัติ")),
+    el("div", { class: "tiles" },
+      tile("EP ที่ลงได้", `${keep.length} / ${D.eps.length}`, [`${Math.round(keep.length / D.eps.length * 100)}% ของทั้งปี`, ""]),
+      tile("วิวต่อ EP (ที่ลงได้)", views(median(keep.map((e) => e.views))), [`ทั้งปี ${views(D.base.views)}`, ""]),
+      tile("EP ที่ถูกตัด", String(D.eps.length - keep.length), [SAFE_HIDE.size ? "ตามระดับที่เลือก" : "ยังไม่ได้เลือกตัด", ""])),
+    el("div", { class: "dgrid" },
+      el("div", { class: "panel span7" }, el("h2", null, "ประเด็นอ่อนไหว"),
+        el("div", { class: "tbl-wrap" }, el("table", null,
+          el("thead", null, el("tr", null, el("th", null, "ประเด็น"), el("th", null, "ระดับ"), el("th", null, "EP"), el("th", null, "วิว/EP"), el("th", null, "คอมเม้น/1k วิว"))),
+          el("tbody", null, sens.map((s) => el("tr", { class: "click", tabindex: "0", onclick: () => openModal(`EP ที่มีประเด็น ${s.t}`, el("div", { class: "tbl-wrap" }, el("table", null, el("tbody", null, s.eps.sort((a, b) => b.views - a.views).map((e) => el("tr", { class: "click", onclick: () => epModal(e) }, el("td", { class: "eptitle" }, thumb(e.vid), el("b", null, `EP.${e.ep} `), e.title.slice(0, 50)), el("td", null, e.cat), el("td", null, views(e.views)))))))) },
+            el("td", null, s.t), el("td", null, el("span", { class: "chip " + (s.lv === "สูง" ? "warn" : "") }, s.lv)), el("td", null, s.n), el("td", null, views(s.v)), el("td", null, s.cr.toFixed(1))))))),
+        el("p", { class: "cap" }, "กดแถวเพื่อดูรายชื่อ EP · ประเด็นมาจากการอ่านชื่อคลิปและคอมเม้นยอดนิยม อาจไม่ครบทุกฉาก")),
+      el("div", { class: "panel span5" }, el("h2", null, "EP ที่ลงได้ในแต่ละหมวด"),
+        el("div", { class: "bars" }, cats.map((c) => { const row = el("div", { class: "bar-row", tabindex: "0" }, el("span", { class: "lbl" }, c.c), el("div", { class: "track" }, el("div", { class: "fill", style: `width:${c.ok / c.all * 100}%;background:var(--accent)` })), el("span", { class: "val" }, `${c.ok}/${c.all}`)); bindTip(row, `${c.c}: ลงได้ ${c.ok} จาก ${c.all} EP`); return row; })))),
+    el("p", { class: "note" }, "ระดับความอ่อนไหวเป็นข้อเสนอของทีมข้อมูล แบรนด์ควรเป็นคนตัดสินเองว่ารับประเด็นไหนได้"),
+    limits(["tags", "fewEps", "age18"]),
+  ];
+}
+
+
+// ---------- page: audience dashboard ----------
+function pageAudience() {
+  DRAWS.length = 0;
+  const o = D.overall;
+  const heat = (v) => heatFill(v, 3);
+  const cats = D.categories.map((c) => c.name);
+  const gx = D.gen_x_loy, gmax = Math.max(...GENS.flatMap((g) => LOY.map((l) => gx[g][l])));
+  return el("div", { class: "page" },
+    el("div", { class: "dash-head" }, el("div", null, el("span", { class: "eyebrow" }, "คนดู"), el("h1", null, "ใครคอมเม้น และชอบอะไร")), el("button", { class: "linkbtn small", type: "button", onclick: () => openGloss("แฟนตัวยง") }, "นิยามกลุ่ม")),
+    el("div", { class: "tiles" },
+      tile("คนคอมเม้น", fmt(D.n_people), null, null, "คนคอมเม้น"),
+      tile("แฟนตัวยง", fmt(o.loyalty_people["แฟนตัวยง"]), [`${pct(o.loyalty_pct["แฟนตัวยง"])} ของคน · เขียน ${pct(o.comments_by_loyalty["แฟนตัวยง"])} ของคอมเม้น`, "up"], null, "แฟนตัวยง"),
+      tile("ขาจร", fmt(o.loyalty_people["ขาจร"]), [`${pct(o.loyalty_pct["ขาจร"])} ของคน · เขียน ${pct(o.comments_by_loyalty["ขาจร"])}`, ""], null, "ขาจร"),
+      tile("Gen ที่มากสุด", "Gen Y " + pct(o.gen_pct["Gen Y"]), [`ช่วงที่น่าจะเป็น ${o.gen_ci["Gen Y"][0]}–${o.gen_ci["Gen Y"][1]}%`, ""], null, "Gen"),
+      tile("ขาประจำที่จัดสายได้", fmt(D.comm_n), ["คอมเม้นตั้งแต่ 3 EP", ""], null, "สายความสนใจ")),
+    el("div", { class: "dgrid" },
+      el("div", { class: "panel span6" }, el("div", { class: "panel-head" }, el("h2", null, "คน vs คอมเม้น"), el("span", { class: "cap" }, "แต่ละกลุ่มมีคนกี่ % และเขียนคอมเม้นกี่ %")),
+        el("div", { class: "pairs" }, LOY.map((l) => el("button", { type: "button", class: "pair", onclick: () => loyaltyModal(l) },
+          el("span", { class: "pl" }, l),
+          el("div", { class: "pb" }, el("div", { class: "track" }, el("div", { class: "fill", style: `width:${o.loyalty_pct[l]}%;background:var(--l3)` })), el("span", { class: "num cap" }, "คน " + pct(o.loyalty_pct[l]))),
+          el("div", { class: "pb" }, el("div", { class: "track" }, el("div", { class: "fill", style: `width:${o.comments_by_loyalty[l]}%;background:var(--accent)` })), el("span", { class: "num cap" }, "คอมเม้น " + pct(o.comments_by_loyalty[l])))))),
+        el("p", { class: "cap" }, "กดชื่อกลุ่มเพื่อดูรายละเอียด")),
+      el("div", { class: "panel span6" }, el("div", { class: "panel-head" }, el("h2", null, "วัย × ความภักดี"), el("span", { class: "cap" }, "จำนวนคนโดยประมาณ")),
+        el("div", { class: "tbl-wrap" }, el("table", { class: "heat" },
+          el("thead", null, el("tr", null, el("th", null, ""), LOY.map((l) => el("th", null, l)))),
+          el("tbody", null, GENS.map((g) => el("tr", null, el("td", null, el("i", { class: "dot", style: `background:${GCOL[g]}` }), g),
+            LOY.map((l) => { const v = gx[g][l]; const td = el("td", { class: "cell", style: `background:color-mix(in srgb, var(--accent) ${Math.round(v / gmax * 70)}%, var(--surface))` }, fmt(v)); bindTip(td, `${g} ที่เป็น${l} ราว ${fmt(v)} คน`); return td; })))))),
+        el("p", { class: "cap" }, "Gen Z ส่วนใหญ่เป็นขาจร แฟนตัวยงเกือบทั้งหมดเป็น Gen Y และ X ขึ้นไป")),
+      el("div", { class: "panel span12" }, el("div", { class: "panel-head" }, el("h2", null, "4 สายความสนใจ × หมวด"), el("span", { class: "cap" }, "คอมเม้นหมวดนั้นกี่เท่าของที่ออกอากาศ · แดง = มากกว่า น้ำเงิน = น้อยกว่า · กดชื่อสาย")),
+        el("div", { class: "tbl-wrap" }, el("table", { class: "heat" },
+          el("thead", null, el("tr", null, el("th", null, "สาย"), el("th", null, "คน"), cats.map((c) => el("th", { class: "rot" }, el("span", null, c))))),
+          el("tbody", null, D.communities.map((c) => el("tr", null,
+            el("td", null, el("button", { type: "button", class: "linkbtn", onclick: () => saiModal(c) }, c.name)), el("td", null, fmt(c.people)),
+            cats.map((k) => { const v = c.lift[k]; const td = el("td", { class: "cell", style: `background:${heat(v)};${Math.abs(Math.log(v)) > .55 ? "color:var(--bg);font-weight:600" : ""}` }, x2(v)); bindTip(td, `${c.name} คอมเม้น${k} ${x2(v)} ของที่ออกอากาศ`); return td; })))))),
+        el("p", { class: "cap" }, "สายเป็นแนวโน้ม คนส่วนใหญ่ดูหลายเรื่องปนกัน")),
+    ),
+    limits(["sai", "genEstimate", "genBias", "commenters"]),
+  );
+}
+
+// ---------- page: content explorer ----------
+let cSort = "views", cDir = -1, epQ = "";
+function pageContent() {
+  DRAWS.length = 0;
+  const wrap = el("div", { class: "page" });
+  const render = () => { wrap.replaceChildren(...contentBody(render)); };
+  render(); return wrap;
+}
+function contentBody(rerender) {
+  const B = D.base;
+  const cols = [["name", "หมวด"], ["eps", "EP"], ["views", "วิว/EP"], ["comments", "คอมเม้น/EP"], ["comment_rate", "คอมเม้น/1k วิว"], ["drift", "ขาจร"], ["fan", "แฟนตัวยง"], ["gen", "วัยเด่น"]];
+  const mxv = Math.max(...D.categories.map((c) => c.views));
+  const rows = [...D.categories].sort((a, b) => (a[cSort] > b[cSort] ? 1 : a[cSort] < b[cSort] ? -1 : 0) * cDir).map((c) => {
+    const g = topGen(c);
+    return el("tr", { class: "click", tabindex: "0", onclick: () => catModal(c), onkeydown: (e) => { if (e.key === "Enter") catModal(c); } },
+      el("td", null, c.name), el("td", null, c.eps),
+      el("td", null, el("span", { class: "inbar" }, el("i", { style: `width:${c.views / mxv * 100}%` })), views(c.views), ratioTag(c.views, B.views)),
+      el("td", null, fmt(c.comments), ratioTag(c.comments, B.comments)), el("td", null, c.comment_rate.toFixed(1), ratioTag(c.comment_rate, B.comment_rate)),
+      el("td", null, pct(c.drift), ratioTag(c.drift, B.drift)), el("td", null, pct(c.fan), ratioTag(c.fan, B.fan)),
+      el("td", null, g ? el("span", { class: "chip", style: `background:transparent;border:1px solid ${GCOL[g]}` }, g) : el("span", { class: "muted" }, "–")));
+  });
+  const q = epQ.trim().toLowerCase();
+  const list = filtered().filter((e) => !q || (`ep.${e.ep} ${e.title} ${e.cat}`).toLowerCase().includes(q)).sort((a, b) => b.views - a.views);
+  const tags = D.tags.filter((t) => !t.few_eps);
+  return [
+    el("div", { class: "dash-head" }, el("div", null, el("span", { class: "eyebrow" }, "คอนเทนต์"), el("h1", null, "หมวดและ EP")), el("span", { class: "small muted" }, `ค่ากลางทั้งรายการ ${views(B.views)} วิว · ${fmt(B.comments)} คอมเม้น ต่อ EP`)),
+    el("div", { class: "dgrid" },
+      el("div", { class: "panel span12" }, el("div", { class: "panel-head" }, el("h2", null, "10 หมวด (ทั้งปี)"), el("span", { class: "cap" }, "▲▼ = สูง/ต่ำกว่าค่ากลางทั้งรายการ 10% ขึ้นไป · กดหัวคอลัมน์เพื่อเรียง · กดแถวเพื่อดูประเด็นย่อย")),
+        el("div", { class: "tbl-wrap" }, el("table", null,
+          el("thead", null, el("tr", null, cols.map(([k, n]) => el("th", null, k === "gen" ? n : el("button", { type: "button", onclick: () => { cDir = cSort === k ? -cDir : -1; cSort = k; rerender(); } }, n + (cSort === k ? (cDir > 0 ? " ↑" : " ↓") : "")))))),
+          el("tbody", null, rows))), el("p", { class: "cap" }, CAT_KAPPA)),
+      el("div", { class: "panel span6" }, el("h2", null, "ประเด็นที่ได้วิวสูงสุด"),
+        bars([...tags].sort((a, b) => b.views - a.views).slice(0, 8).map((t) => ({ label: t.tag, value: t.views, color: "var(--accent)", tip: `${t.tag}: ${views(t.views)} วิว (${t.eps} EP)` })), { fmtv: views }), el("p", { class: "cap" }, "ค่ากลางวิวต่อ EP · ประเด็นที่มีตั้งแต่ 3 EP")),
+      el("div", { class: "panel span6" }, el("h2", null, "ประเด็นที่คนชอบออกความเห็น"),
+        bars([...tags].sort((a, b) => b.comment_rate - a.comment_rate).slice(0, 8).map((t) => ({ label: t.tag, value: t.comment_rate, color: "var(--ink-2)", tip: `${t.tag}: ${t.comment_rate} คอมเม้นต่อ 1,000 วิว (${t.eps} EP)` })), { fmtv: (v) => v.toFixed(1) }), el("p", { class: "cap" }, "คอมเม้นต่อ 1,000 วิว ไม่ขึ้นกับความดังของคลิป")),
+      el("div", { class: "panel span12" }, el("div", { class: "panel-head" }, el("h2", null, "ค้นหา EP"), el("input", { type: "search", id: "ep-q", placeholder: "พิมพ์เลข EP ชื่อเรื่อง หรือหมวด", value: epQ, class: "search", oninput: (e) => { epQ = e.target.value; const pos = e.target.selectionStart; rerender(); const n = document.getElementById("ep-q"); n.focus(); n.setSelectionRange(pos, pos); } })),
+        el("div", { class: "tbl-wrap scrolly" }, el("table", null,
+          el("thead", null, el("tr", null, ["EP", "วันที่", "หมวด", "วิว", "คอมเม้น", "คอมเม้น/1k", "ขาจร", "แฟนตัวยง"].map((h, i) => el("th", { style: i < 3 ? "text-align:left" : null }, h)))),
+          el("tbody", null, list.slice(0, 60).map((e) => el("tr", { class: "click", tabindex: "0", onclick: () => epModal(e), onkeydown: (ev) => { if (ev.key === "Enter") epModal(e); } },
+            el("td", { class: "eptitle" }, thumb(e.vid), el("b", null, `EP.${e.ep} `), e.title.slice(0, 44), age18(e.ep)), el("td", { style: "text-align:left" }, e.date), el("td", { style: "text-align:left" }, e.cat),
+            el("td", null, views(e.views)), el("td", null, fmt(e.comments)), el("td", null, e.cr.toFixed(1)), el("td", null, pct(e.drift)), el("td", null, pct(e.fan))))))),
+        el("p", { class: "cap" }, `${list.length} EP ตามตัวกรองด้านบน ${list.length > 60 ? "· แสดง 60 อันดับแรกตามยอดวิว" : ""}`)),
+    ),
+  ];
+}
+
+
+function pageBrands() {
+  const bc = D.brands_comments.filter((b) => b.comments > 0), zero = D.brands_comments.filter((b) => b.comments === 0);
+  const total = D.brands_comments.reduce((s, b) => s + b.comments, 0);
+  const onair = D.brands_onair || [];
+  return el("div", { class: "page" },
+    head("แบรนด์", "แบรนด์ในรายการ คนพูดถึงไหม", "ดูจากสองที่ คือคอมเม้นของคนดู และคำพูดของพิธีกรในรายการ (ข้อความถอดเสียงจาก YouTube)"),
+    el("div", { class: "grid g2" },
+      el("div", { class: "panel" }, el("h2", null, "คนดูพูดถึงแบรนด์ไหน"), el("p", { class: "small muted" }, `รวม ${fmt(total)} คอมเม้น จาก ${fmt(D.n_comments)} คอมเม้นทั้งหมด`),
+        bars(bc.map((b) => ({ label: b.brand.replace(" (แชมพูพี่หนุ่ม)", ""), value: b.comments, color: "var(--accent)", tip: `${b.brand}: ${b.comments} คอมเม้น ใน ${b.eps} EP` })), { fmtv: (v) => fmt(v) + " ครั้ง" }),
+        zero.length ? el("p", { class: "small muted" }, "ไม่มีคนพูดถึงเลย: " + zero.map((b) => b.brand).join(", ")) : null),
+      el("div", { class: "panel" }, el("div", { class: "panel-head" }, el("h2", null, "พิธีกรพูดชื่อแบรนด์ไหน"), el("span", { class: "chip warn" }, `ตรวจแล้ว ${D.onair_eps} จาก ${D.n_eps} EP`)),
+        el("p", { class: "small muted" }, "จำนวน EP ที่ได้ยินชื่อ ส่วนใหญ่อยู่ในช่วงมอบของให้แขกท้ายรายการ"),
+        onair.length ? bars(onair.map((b) => ({ label: b.brand, value: b.eps, color: "var(--ink-2)", tip: `${b.brand}: ${b.eps} EP จาก ${D.onair_eps} EP ที่ตรวจ` })), { max: D.onair_eps, fmtv: (v) => `${v} EP` }) : el("p", { class: "muted" }, "ยังไม่มีข้อมูล"),
+        el("p", { class: "small muted" }, "กำลังดึงข้อความถอดเสียงเพิ่ม ตัวเลขจะครบเมื่อดึงครบทุก EP"))),
+    el("div", { class: "panel" }, el("h2", null, "รูปแบบโฆษณาไหน คนพูดถึง"),
+      el("div", { class: "tbl-wrap" }, el("table", null,
+        el("thead", null, el("tr", null, el("th", null, "รูปแบบ"), el("th", { style: "text-align:left" }, "ตัวอย่างแบรนด์"), el("th", { style: "text-align:left" }, "คนพูดถึงไหม"))),
+        el("tbody", null,
+          el("tr", null, el("td", null, el("b", null, "พิธีกรใช้หรือยื่นสินค้าบนจอ")), el("td", { style: "text-align:left;white-space:normal" }, "M150, หงส์ไทย, ไลโอ"), el("td", { style: "text-align:left;white-space:normal" }, el("span", { class: "chip good" }, "พูดถึงมากที่สุด"), " แซวพิธีกรกับแขก บางคนบอกว่าซื้อแล้ว")),
+          el("tr", null, el("td", null, el("b", null, "อ่านชื่อช่วงมอบของ")), el("td", { style: "text-align:left;white-space:normal" }, "วิซี, ฮาชิ GD Plus"), el("td", { style: "text-align:left;white-space:normal" }, el("span", { class: "chip warn" }, "พูดถึงน้อย"), " วิซีถูกอ่านชื่อบ่อยแต่ไม่มีคอมเม้นถึงเลย")),
+          el("tr", null, el("td", null, el("b", null, "ไม่ปรากฏในเนื้อรายการ")), el("td", { style: "text-align:left;white-space:normal" }, zero.filter((b) => b.brand !== "วิซี").map((b) => b.brand.replace(" (นิสิต)", "")).join(", ")), el("td", { style: "text-align:left;white-space:normal" }, el("span", { class: "chip" }, "ไม่พบ"), " น่าจะอยู่แค่ช่วงโฆษณาคั่น ต้องเช็กกับตารางสปอนเซอร์")))))),
+    el("div", { class: "grid g2" },
+      el("div", { class: "panel" }, el("span", { class: "chip hot", style: "justify-self:start" }, "ข้อเสนอขาย"), el("h3", null, "ขายแพ็กเกจ 'พิธีกรใช้สินค้า' คู่กับ Slot ปกติ"),
+        el("p", { class: "small muted" }, "สินค้าที่อยู่ในเนื้อเรื่องถูกจำและถูกพูดต่อ ส่วนการอ่านชื่ออย่างเดียวคนแทบไม่พูดถึง")),
+      el("div", { class: "panel" }, el("span", { class: "chip warn", style: "justify-self:start" }, "สัญญาณเตือน"), el("h3", null, "คนบ่นโฆษณา YouTube คั่นบ่อย"),
+        el("p", { class: "small muted" }, "มีคอมเม้นบ่นเรื่องโฆษณาคั่นหลายร้อยครั้ง การเพิ่มโฆษณาคั่นอาจทำให้คนดูเบื่อ การฝังสินค้าในเนื้อเรื่องน่าจะดีกว่า"))),
+    el("p", { class: "note" }, "คอมเม้นที่พูดถึงแบรนด์ไม่ใช่ยอดขาย ใช้ดูแค่ว่าคนสังเกตเห็นสินค้าไหม ตัวเลขน้อยเกินกว่าจะแยกตามสายหรือวัยได้"),
+    limits(["commenters", "conv"]),
+  );
+}
+
+// ---------- planner ----------
+const P = { brand: "", campaign: "", product: "health", gen: "Gen X ขึ้นไป", goal: "loyal", n: 6, safety: ["สูง"], rate: "" };
+function scoreCats() {
+  const prod = PRODUCTS.find((p) => p.id === P.product), goal = GOALS.find((g) => g.id === P.goal);
+  const fitRaw = (c) => prod.sai.reduce((s, n) => s + Math.log(comm(n).lift[c.name]), 0) / prod.sai.length;
+  const genRaw = (c) => P.gen === "all" ? 0 : Math.log(c.gen_lift[P.gen]);
+  const goalRaw = (c) => goal.key === "views" ? Math.log(c.views) : c[goal.key];
+  const norm = (f) => { const v = D.categories.map(f), lo = Math.min(...v), hi = Math.max(...v); return (c) => hi === lo ? 50 : (f(c) - lo) / (hi - lo) * 100; };
+  const nf = norm(fitRaw), ng = norm(genRaw), no = norm(goalRaw);
+  const w = P.gen === "all" ? [.6, 0, .4] : [.5, .2, .3];
+  return D.categories.map((c) => {
+    const fit = nf(c), gs = P.gen === "all" ? null : ng(c), gl = no(c);
+    const reasons = [];
+    prod.sai.forEach((n) => { const v = comm(n).lift[c.name]; reasons.push({ t: `${n} ${x2(v)}`, k: v >= 1.15 ? "hot" : v <= .85 ? "cool" : "" }); });
+    const gv = goal.key === "views" ? views(c.views) + " วิว" : goal.key === "comment_rate" ? c.comment_rate.toFixed(1) + " คอมเม้น/1,000 วิว" : pct(c[goal.key]) + (goal.key === "fan" ? " แฟนตัวยง" : " ขาจร");
+    reasons.push({ t: gv, k: gl >= 60 ? "good" : "" });
+    if (P.gen !== "all") reasons.push({ t: `${P.gen} ${x2(c.gen_lift[P.gen])}`, k: c.gen_lift[P.gen] >= 1.03 ? "good" : c.gen_lift[P.gen] <= .97 ? "cool" : "" });
+    return { c, fit, gs, gl, score: w[0] * fit + w[1] * (gs || 0) + w[2] * gl, reasons };
+  }).sort((a, b) => b.score - a.score);
+}
+// Flow: requirement form -> Submit -> short skeleton -> editable report -> Export PDF (downloads capability)
+let PV = "form";
+const fmtDate = () => { const d = new Date(); return `${d.getDate()} ${TH_M[d.getMonth()]} ${d.getFullYear() + 543}`; };
+function pagePlanner() {
+  const wrap = el("div", { class: "page" });
+  const go2 = (v) => { PV = v; render(); window.scrollTo(0, 0); };
+  function render() {
+    if (PV === "form") wrap.replaceChildren(...plannerForm(() => { go2("loading"); setTimeout(() => go2("report"), 900); }));
+    else if (PV === "loading") wrap.replaceChildren(skeleton());
+    else wrap.replaceChildren(...plannerReport(() => go2("form")));
+  }
+  render(); return wrap;
+}
+function plannerForm(onSubmit) {
+  const seg = (opts, key, multi) => el("div", { class: "seg", role: "group" }, opts.map(([id, name]) => {
+    const on = multi ? P[key].includes(id) : P[key] === id;
+    return el("button", { type: "button", "aria-pressed": String(on), onclick: (e) => {
+      if (multi) P[key] = on ? P[key].filter((x) => x !== id) : [...P[key], id]; else P[key] = id;
+      e.currentTarget.parentNode.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(multi ? P[key].includes(opts[i][0]) : P[key] === opts[i][0])));
+    } }, name);
+  }));
+  const txt = (id, key, ph) => el("input", { type: "text", id, value: P[key], placeholder: ph, oninput: (e) => (P[key] = e.target.value) });
+  const nlab = el("span", { class: "chip" }, `${P.n} EP`);
+  const form = el("form", { class: "panel req", onsubmit: (e) => { e.preventDefault(); onSubmit(); } },
+    el("div", { class: "req-grid" },
+      el("div", { class: "field" }, el("label", { for: "r-brand" }, "ชื่อลูกค้า / แบรนด์"), txt("r-brand", "brand", "เช่น แบรนด์อาหารเสริม A")),
+      el("div", { class: "field" }, el("label", { for: "r-camp" }, "ชื่อแคมเปญ"), txt("r-camp", "campaign", "เช่น เปิดตัวสินค้าใหม่ Q1")),
+      el("div", { class: "field" }, el("label", { for: "r-product" }, "ประเภทสินค้า"), el("select", { id: "r-product", onchange: (e) => (P.product = e.target.value) }, PRODUCTS.map((p) => el("option", { value: p.id, selected: p.id === P.product }, p.name)))),
+      el("div", { class: "field" }, el("div", { class: "panel-head" }, el("label", { for: "r-n" }, "จำนวน EP ที่จะวาง"), nlab), el("input", { type: "range", id: "r-n", min: "1", max: "20", value: String(P.n), oninput: (e) => { P.n = +e.target.value; nlab.textContent = `${P.n} EP`; } }))),
+    el("div", { class: "field" }, el("span", { class: "flabel" }, "กลุ่มวัยที่ต้องการ"), seg([["all", "ทุกวัย"], ...GENS.map((g) => [g, g])], "gen"), el("span", { class: "hint" }, "Gen Z เกิด 2540 ขึ้นไป · Gen Y 2524–2539 · Gen X ขึ้นไป ก่อน 2524")),
+    el("div", { class: "field" }, el("span", { class: "flabel" }, "เป้าหมายหลัก"), seg(GOALS.map((g) => [g.id, g.name]), "goal")),
+    el("div", { class: "field" }, el("span", { class: "flabel" }, "Brand safety: ไม่ลง EP ที่มีประเด็นอ่อนไหว"), seg([["สูง", "ระดับสูง (คดีทางเพศ เสียชีวิต ยาเสพติด)"], ["กลาง", "ระดับกลาง (ทำร้ายร่างกาย เด็ก ภัยพิบัติ)"]], "safety", true)),
+    el("div", { class: "field" }, el("label", { for: "r-rate" }, "สมมติฐาน conversion (ถ้ามี): ใช้โค้ดกี่ครั้งต่อ 1,000 วิว"), el("input", { type: "number", id: "r-rate", min: "0", step: "0.01", placeholder: "เว้นว่างได้ ระบบไม่ใส่ค่าให้", value: P.rate, oninput: (e) => (P.rate = e.target.value) })),
+    el("div", { class: "req-foot" }, el("span", { class: "cap" }, "ระบบใช้ข้อมูลคนคอมเม้น YouTube ปี 2569 จัดอันดับหมวด EP และคาดการณ์ผล"), el("button", { type: "submit", class: "btn big-btn" }, "สร้างรายงาน →")));
+  return [
+    el("div", { class: "dash-head" }, el("div", null, el("span", { class: "eyebrow" }, "เครื่องมือ · วางแผนแคมเปญ"), el("h1", null, "ใส่โจทย์ลูกค้า แล้วได้รายงานพร้อมส่ง")), el("span", { class: "cap" }, "1 โจทย์ → 2 รายงาน → 3 แก้ข้อความ → 4 Export PDF")),
+    form,
+  ];
+}
+function skeleton() {
+  const bar = (w, h = 14) => el("div", { class: "sk", style: `width:${w};height:${h}px` });
+  return el("div", { class: "paper-wrap", "aria-busy": "true", "aria-label": "กำลังสร้างรายงาน" },
+    el("div", { class: "paper sk-paper" }, bar("40%", 26), bar("60%"), el("div", { class: "sk-row" }, bar("100%", 70), bar("100%", 70), bar("100%", 70)), bar("90%"), bar("80%"), bar("85%"), el("div", { class: "sk-row" }, bar("100%", 120), bar("100%", 120)), bar("70%"), bar("75%")),
+    el("p", { class: "cap", style: "text-align:center" }, "กำลังวิเคราะห์โจทย์และสร้างรายงาน…"));
+}
+function planNumbers() {
+  const ranked = scoreCats(), top = ranked.slice(0, 3);
+  const alloc = [0, 0, 0]; for (let i = 0; i < P.n; i++) alloc[[0, 1, 0, 2, 1, 0][i % 6]]++;
+  const plan = top.map((r, i) => ({ ...r, n: alloc[i] })).filter((r) => r.n > 0);
+  const tv = plan.reduce((s, r) => s + r.n * r.c.views, 0), tc = plan.reduce((s, r) => s + r.n * r.c.comments, 0);
+  const genShare = (g) => plan.reduce((s, r) => s + r.n * r.c.views * r.c.gen[g] / 100, 0) / tv * 100;
+  const loyMix = (k) => plan.reduce((s, r) => s + r.n * r.c[k], 0) / P.n;
+  const R = D.reach, Uc = (c, k) => R.curves[c][Math.min(k, R.kmax) - 1];
+  const uniqRaw = R.n_commenters * (1 - plan.reduce((p, r) => p * (1 - Uc(r.c.name, r.n) / R.n_commenters), 1));
+  const uniq = uniqRaw * (R.beta[plan.length] || 1), expo = plan.reduce((s, r) => s + r.n * R.mean_people_per_ep[r.c.name], 0);
+  const out = (e) => e.tags.some((t) => SENSITIVE[t] && P.safety.includes(SENSITIVE[t]));
+  const avail = plan.map((r) => { const all = D.eps.filter((e) => e.cat === r.c.name); return { name: r.c.name, all: all.length, ok: all.filter((e) => !out(e)).length }; });
+  const examples = plan.map((r) => D.eps.filter((e) => e.cat === r.c.name && !out(e)).sort((a, b) => b.views - a.views)[0]).filter(Boolean);
+  return { ranked, plan, tv, tc, genShare, loyMix, uniq, freq: expo / uniq, avail, examples };
+}
+const FORMAT_INFO = {
+  onscreen: {
+    what: "พิธีกรหยิบสินค้ามาใช้จริง หรือยื่นให้แขกระหว่างคุยเรื่อง คนดูเห็นสินค้าอยู่ในเนื้อเรื่อง",
+    talk: ["แซวพิธีกรหรือแขกที่ใช้สินค้า (เป็นมุกตลก ไม่ใช่โฆษณา)", "บอกว่าใช้สินค้าอยู่แล้ว หรือจะไปซื้อตาม", "จำชื่อสินค้าได้ และพูดถึงต่อใน EP ถัดๆ ไป"],
+    level: "คนพูดถึงมากที่สุด", kind: "good", perEp: () => { const b = D.brands_comments.find((x) => x.brand === "M150"); return b ? b.comments / Math.max(b.eps, 1) : 0; },
+    evidence: () => { const b = D.brands_comments.find((x) => x.brand === "M150") || { comments: 0, eps: 0 }; return `อ้างอิงจริง: M150 ที่พิธีกรยื่นให้แขก มีคนพูดถึง ${b.comments} คอมเม้นใน ${b.eps} EP และยาดมหงส์ไทยที่พิธีกรดมบนจอก็ถูกพูดถึงแบบเดียวกัน`; },
+    tip: "ให้พิธีกรใช้สินค้าในจังหวะที่เข้ากับเรื่อง เช่น ยื่นให้แขกตอนเครียด จะถูกจำและถูกพูดต่อ",
+  },
+  read: {
+    what: "พิธีกรอ่านชื่อและสรรพคุณสินค้า ช่วงมอบของให้แขกท้ายรายการ",
+    talk: ["คนเห็นชื่อสินค้า แต่แทบไม่มีใครพูดถึงในคอมเม้น", "ถ้าไม่มีจังหวะใช้สินค้าจริง คนจะจำได้น้อย"],
+    level: "คนพูดถึงน้อย", kind: "warn", perEp: () => 0,
+    evidence: () => { const v = (D.brands_onair || []).find((x) => x.brand === "วิซี"); return v ? `อ้างอิงจริง: วิซีถูกพิธีกรอ่านชื่อ ${v.eps} จาก ${D.onair_eps} EP ที่ตรวจ แต่ไม่มีคอมเม้นพูดถึงเลย` : "อ้างอิงจากแบรนด์ที่ถูกอ่านชื่อช่วงมอบของ"; },
+    tip: "เพิ่มจังหวะที่พิธีกรใช้สินค้าจริงคู่กับการอ่านชื่อ จะได้ผลดีกว่าอ่านชื่ออย่างเดียว",
+  },
+  break: {
+    what: "โฆษณาช่วงพักรายการ ไม่ได้อยู่ในเนื้อเรื่อง",
+    talk: ["ไม่พบคนพูดถึงแบรนด์ที่อยู่แค่ช่วงพักเลย", "มีคนบ่นในคอมเม้นว่าโฆษณาคั่นบ่อยและยาว"],
+    level: "ไม่พบคนพูดถึง", kind: "", perEp: () => 0,
+    evidence: () => "อ้างอิงจริง: ข้าวหงส์ทอง Nisit และครีมดารา ไม่มีคอมเม้นพูดถึงเลยทั้งปี",
+    tip: "ใช้คู่กับรูปแบบที่พิธีกรใช้สินค้าบนจอ ถ้าลูกค้าอยากให้คนพูดถึง",
+  },
+};
+const ytUrl = (vid) => `https://www.youtube.com/watch?v=${vid}`;
+function plainReason(r) {
+  const prod = PRODUCTS.find((p) => p.id === P.product), goal = GOALS.find((g) => g.id === P.goal), c = r.c, B = D.base, out = [];
+  prod.sai.forEach((n) => { const v = comm(n).lift[c.name]; out.push(`คนกลุ่ม${n} คอมเม้นเรื่องหมวดนี้${v >= 1 ? "มากกว่า" : "น้อยกว่า"}ปกติ ${liftWords(v)}`); });
+  if (goal.key === "views") out.push(`ได้ราว ${views(c.views)} วิวต่อ EP (ทั้งรายการ ${views(B.views)})`);
+  else if (goal.key === "fan") out.push(`แฟนตัวยงราว ${pct(c.fan)} ของคนคอมเม้น (ทั้งรายการ ${pct(B.fan)})`);
+  else if (goal.key === "drift") out.push(`คนใหม่ (ขาจร) ราว ${pct(c.drift)} ของคนคอมเม้น (ทั้งรายการ ${pct(B.drift)})`);
+  else out.push(`คนคอมเม้น ${c.comment_rate.toFixed(1)} ครั้งต่อ 1,000 วิว (ทั้งรายการ ${B.comment_rate.toFixed(1)})`);
+  if (P.gen !== "all") { const v = c.gen_lift[P.gen]; out.push(`${P.gen} ${Math.abs(v - 1) < .02 ? "ใกล้เคียงปกติ" : (v > 1 ? "มากกว่า" : "น้อยกว่า") + "ปกติ " + liftWords(v)}`); }
+  return out;
+}
+// ---------- Venn: คนไม่ซ้ำ และคนที่ซ้ำกันระหว่างหมวด ----------
+const VCOL = ["#1E40AF", "#D97706", "#15803D"];
+function vennModel(plan) {
+  const R = D.reach, N = R.n_commenters, Uc = (c, k) => R.curves[c][Math.min(k, R.kmax) - 1];
+  const sets = plan.map((r) => ({ name: r.c.name, eps: r.n, u: Uc(r.c.name, r.n) }));
+  const n = sets.length, p = sets.map((s) => s.u / N), cal = R.beta[n] || 1;
+  const sum = sets.reduce((t, s) => t + s.u, 0);
+  const target = n === 1 ? sets[0].u * cal : N * (1 - p.reduce((q, x) => q * (1 - x), 1)) * cal;  // คนไม่ซ้ำรวม ตัวเดียวกับที่รายงานใช้
+  // เพิ่มสัดส่วนคนที่ซ้ำกันด้วยตัวคูณ lam ให้ผลรวมเท่ากับตัวเลขที่คาลิเบรตไว้ (คนคอมเม้นบ่อยมักโผล่หลายหมวด)
+  let lam = 1;
+  if (n === 2) lam = (sum - target) / (p[0] * p[1] * N);
+  else if (n === 3) { const s2 = (p[0] * p[1] + p[0] * p[2] + p[1] * p[2]) * N, s3 = p[0] * p[1] * p[2] * N, cc = sum - target;
+    const disc = s2 * s2 - 4 * s3 * cc; lam = disc > 0 ? (s2 - Math.sqrt(disc)) / (2 * s3) : s2 / (2 * s3); }
+  lam = Math.max(1, Math.min(lam, 1 / Math.max(...p, 1e-9)));
+  const regions = [];
+  for (let m = 1; m < (1 << n); m++) {                                   // inclusion-exclusion ของแต่ละส่วนย่อย
+    let people = 0;
+    for (let q = 0; q < (1 << n); q++) {
+      if ((q & m) !== m) continue;                                       // เอาเฉพาะชุดที่ครอบ m
+      let t = N, c = 0;
+      for (let i = 0; i < n; i++) if (q >> i & 1) { t *= p[i]; c++; }
+      people += ((c - bits(m)) % 2 ? -1 : 1) * t * Math.pow(lam, c - 1);
+    }
+    regions.push({ m, people: Math.max(people, 0) });
+  }
+  if (n === 1) regions[0].people = target;
+  sets.forEach((s, i) => (s.people = regions.filter((g) => g.m >> i & 1).reduce((t, g) => t + g.people, 0)));
+  return { sets, regions, union: regions.reduce((t, g) => t + g.people, 0), N, lam };
+}
+function bits(m) { let c = 0; while (m) { c += m & 1; m >>= 1; } return c; }
+function vennLayout(V, W, H) {
+  const n = V.sets.length, A = V.sets.map((s) => s.people);
+  const k = Math.min(W * .30, H * .42) / Math.sqrt(Math.max(...A));
+  const r = A.map((a) => Math.sqrt(a) * k), per = Math.PI * k * k;        // พื้นที่ต่อคน 1 คน
+  const lens = (ra, rb, d) => { if (d >= ra + rb) return 0; if (d <= Math.abs(ra - rb)) return Math.PI * Math.min(ra, rb) ** 2;
+    const a1 = Math.acos((d * d + ra * ra - rb * rb) / (2 * d * ra)), a2 = Math.acos((d * d + rb * rb - ra * ra) / (2 * d * rb));
+    return ra * ra * (a1 - Math.sin(2 * a1) / 2) + rb * rb * (a2 - Math.sin(2 * a2) / 2); };
+  const dist = (i, j) => { const tgt = per * V.regions.filter((g) => (g.m >> i & 1) && (g.m >> j & 1)).reduce((t, g) => t + g.people, 0);
+    let lo = Math.abs(r[i] - r[j]), hi = r[i] + r[j];
+    for (let s = 0; s < 44; s++) { const mid = (lo + hi) / 2; if (lens(r[i], r[j], mid) > tgt) lo = mid; else hi = mid; }
+    return (lo + hi) / 2; };
+  const c = [{ x: 0, y: 0 }];
+  if (n >= 2) c.push({ x: dist(0, 1), y: 0 });
+  if (n === 3) { const d01 = c[1].x, d02 = dist(0, 2), d12 = dist(1, 2);
+    const x = (d01 * d01 + d02 * d02 - d12 * d12) / (2 * d01), y2 = d02 * d02 - x * x;
+    c.push({ x, y: Math.sqrt(Math.max(y2, (d02 * .25) ** 2)) }); }
+  const x0 = Math.min(...c.map((q, i) => q.x - r[i])), x1 = Math.max(...c.map((q, i) => q.x + r[i]));
+  const y0 = Math.min(...c.map((q, i) => q.y - r[i])), y1 = Math.max(...c.map((q, i) => q.y + r[i]));
+  const pad = 30, s = Math.min((W - pad * 2) / (x1 - x0), (H - pad * 2) / (y1 - y0), 1.6);
+  const ox = (W - (x1 - x0) * s) / 2 - x0 * s, oy = (H - (y1 - y0) * s) / 2 - y0 * s;
+  return c.map((q, i) => ({ x: ox + q.x * s, y: oy + q.y * s, r: r[i] * s }));
+}
+function vennSpots(V, pos, W, H) {                                        // หาจุดวางตัวเลขของแต่ละส่วน: จุดที่อยู่ลึกที่สุดในส่วนนั้น
+  const n = V.sets.length, acc = {};
+  for (let y = 3; y < H; y += 3) for (let x = 3; x < W; x += 3) {
+    let m = 0, deep = 1e9;
+    for (let i = 0; i < n; i++) { const d = Math.hypot(x - pos[i].x, y - pos[i].y);
+      if (d <= pos[i].r) m |= 1 << i;
+      deep = Math.min(deep, Math.abs(d - pos[i].r)); }
+    if (!m) continue;
+    const a = acc[m] || (acc[m] = { c: 0, deep: -1, x: 0, y: 0 });
+    a.c++; if (deep > a.deep) { a.deep = deep; a.x = x; a.y = y; }
+  }
+  for (const m in acc) acc[m].area = acc[m].c * 9;
+  return acc;
+}
+function vennBlock(plan) {
+  const V = vennModel(plan), W = 560, H = V.sets.length === 3 ? 330 : 250;
+  const pos = vennLayout(V, W, H), spot = vennSpots(V, pos, W, H);
+  const svg = S("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: "max-width:100%;height:auto;display:block;margin:4px auto",
+    role: "img", "aria-label": `แผนภาพคนไม่ซ้ำ ${V.sets.map((s) => s.name + " " + fmt(s.people) + " คน").join(", ")} รวม ${fmt(V.union)} คน` });
+  V.sets.forEach((s, i) => svg.append(S("circle", { cx: pos[i].x.toFixed(1), cy: pos[i].y.toFixed(1), r: pos[i].r.toFixed(1),
+    fill: VCOL[i], "fill-opacity": .22, stroke: VCOL[i], "stroke-width": 1.6 })));
+  const tw = (t, px) => [...t].filter((ch) => !/[ัิ-ฺ็-๎]/.test(ch)).length * px;   // สระบน-ล่างและวรรณยุกต์ไม่กินความกว้าง
+  const lab = (x, y, size, weight, color, t) => [
+    S("text", { x, y, "text-anchor": "middle", "font-family": "sans-serif", "font-size": size, "font-weight": weight, stroke: "#FFFFFF", "stroke-width": 3.5, "stroke-linejoin": "round", fill: "#FFFFFF" }, t),
+    S("text", { x, y, "text-anchor": "middle", "font-family": "sans-serif", "font-size": size, "font-weight": weight, fill: color }, t)];
+  V.regions.forEach((g) => { const a = spot[g.m], only = bits(g.m) === 1;
+    if (!a || g.people < 1 || a.area < (only ? 500 : 620)) return;
+    if (!only) { svg.append(...lab(a.x, a.y + 4, 12, 600, "#334155", fmt(g.people))); return; }
+    const i = Math.log2(g.m), c = pos[i], nm = V.sets[i].name;                 // ชื่อหมวดใต้ตัวเลข ย่อลงถ้าวงแคบ
+    const half = Math.sqrt(Math.max(c.r * c.r - (a.y + 16 - c.y) ** 2, 1)), lo = c.x - half + 6, hi = c.x + half - 6;
+    let text = null, x = a.x;
+    const cands = ["เฉพาะ" + nm, "เฉพาะ" + nm.split(" & ")[0]];
+    for (let L = nm.length - 2; L >= 6; L -= 2) cands.push("เฉพาะ" + nm.slice(0, L).trim() + "…");
+    cands.push("เฉพาะหมวดนี้");
+    for (const t of cands) {
+      const w = tw(t, 6.4);
+      if (hi - lo < w) continue;
+      const yy = a.y + 16, step = c.r * .4 / 10;                              // ขยับซ้ายขวาได้บ้าง หาที่ที่ข้อความไม่ล้ำวงอื่น
+      let nx = null;
+      for (let k = 0; k <= 10 && nx == null; k++) for (const sg of k ? [-1, 1] : [1]) {
+        const cx = a.x + sg * k * step;
+        if (cx - w / 2 < lo || cx + w / 2 > hi) continue;
+        if ([cx - w / 2, cx + w / 2].some((ex) => pos.some((q, j) => (Math.hypot(ex - q.x, yy - q.y) <= q.r) !== (j === i)))) continue;
+        nx = cx; break;
+      }
+      if (nx == null) continue;
+      text = t; x = nx; break;
+    }
+    svg.append(...lab(x, a.y, 15, 700, VCOL[i], fmt(g.people)));
+    if (text) svg.append(...lab(x, a.y + 16, 11, 400, "#64748B", text));
+  });
+  const dup = V.sets.reduce((t, s) => t + s.people, 0) - V.union;
+  return el("div", { class: "pvenn" },
+    el("p", { class: "plab" }, "คนไม่ซ้ำ และคนที่เห็นซ้ำจากหลายหมวด"),
+    svg,
+    el("p", { class: "plegend" }, V.sets.map((s, i) => el("span", { style: "white-space:nowrap" },
+      el("i", { style: `display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;background:${VCOL[i]};opacity:.6;border:1px solid ${VCOL[i]}` }),
+      `${s.name} ${s.eps} EP · ${fmt(s.people)} คน`, i < V.sets.length - 1 ? "   ·   " : ""))),
+    el("p", { class: "psmall" }, `รวมคนไม่ซ้ำ ${fmt(V.union)} คน คิดเป็น ${(V.union / V.N * 100).toFixed(1)}% ของคนคอมเม้นทั้งปี (${fmt(V.N)} คน)${V.sets.length > 1 ? ` · มีคนเห็นจากมากกว่าหนึ่งหมวดราว ${fmt(dup)} คน` : ""}${V.sets.length === 3 ? ` · เห็นครบทั้ง 3 หมวด ${fmt(V.regions[6].people)} คน` : ""} · ตัวเลขเป็นค่าประมาณจากแบบจำลองการเข้าถึง คลาดได้ราว ±${Math.round(D.reach.median_abs_error * 100)}%`));
+}
+
+function plannerReport(onBack) {
+  const N = planNumbers(), prod = PRODUCTS.find((p) => p.id === P.product), goal = GOALS.find((g) => g.id === P.goal);
+  const key = "rr-report3:" + JSON.stringify([P.brand, P.campaign, P.product, P.gen, P.goal, P.n, P.safety, P.rate]);
+  let saved = {}; try { saved = JSON.parse(localStorage.getItem(key) || "{}"); } catch (e) { saved = {}; }
+  const ed = (k, tag, text, attrs) => { const n = el(tag, { class: "ed", "data-k": k, ...(attrs || {}) }); n.textContent = saved[k] != null ? saved[k] : text; return n; };
+  const out = (e) => e.tags.some((t) => SENSITIVE[t] && P.safety.includes(SENSITIVE[t]));
+  const who = P.brand || "ลูกค้า";
+  const fmtEst = FORMATS.map((f) => ({ f, n: Math.round(FORMAT_INFO[f.id].perEp() * P.n) })).sort((a, b) => b.n - a.n);
+  const mentions = fmtEst[0].n;
+  const est = P.rate === "" ? null : N.tv / 1000 * (+P.rate);
+  const gbar = (parts) => el("div", { class: "pstack" }, parts.map((p) => el("i", { style: `width:${p.v}%;background:${p.c}` })));
+  const GHEX = { "Gen Z": "#7C3AED", "Gen Y": "#0EA5E9", "Gen X ขึ้นไป": "#0F766E" };
+  const topGenName = GENS.slice().sort((a, b) => N.genShare(b) - N.genShare(a))[0];
+  const paper = el("article", { class: "paper", id: "paper" },
+    el("header", { class: "rsec phead" }, el("div", { class: "pbrand" }, el("i", { class: "onair" }), "ReachRadar · ข้อเสนอแคมเปญรายการโหนกระแส"),
+      ed("title", "h1", P.campaign || `แผนโฆษณาสำหรับ ${who}`), el("p", { class: "pmeta" }, `สำหรับ ${who} · ${prod.name} · จัดทำ ${fmtDate()}`)),
+    // 1. the answer first
+    el("section", { class: "rsec answer" }, el("span", { class: "akicker" }, "คำแนะนำ"),
+      ed("a-head", "p", `ลง ${P.n} EP ในหมวด ${N.plan.map((r) => `${r.c.name} ${r.n} EP`).join(" · ")}`, { class: "ed ahead" }),
+      el("div", { class: "pkpis" }, [[views(N.tv), "ยอดวิวรวมโดยประมาณ"], ["~" + fmt(Math.round(N.uniq / 100) * 100) + " คน", "คนคอมเม้นที่ไม่ซ้ำกัน"], [fmt(N.tc), "คอมเม้นรวม"], [mentions ? "~" + mentions : "–", `คอมเม้นที่น่าจะพูดถึงสินค้า (แบบ${fmtEst[0].f.name})`]].map(([v, l]) => el("div", null, el("b", null, v), el("span", null, l)))),
+      ed("a-sum", "p", `เหมาะกับเป้าหมาย "${goal.name}" ${P.gen === "all" ? `คนที่คอมเม้นใน EP เหล่านี้ส่วนใหญ่เป็น ${topGenName}` : `กลุ่มที่ลูกค้าต้องการ (${P.gen}) คิดเป็นราว ${pct(N.genShare(P.gen))} ของคนคอมเม้นใน EP เหล่านี้`} และ${N.loyMix("fan") >= 40 ? "เกือบครึ่งเป็นแฟนประจำของรายการ" : "มีคนใหม่ที่แวะเข้ามาพอสมควร"}`)),
+    // 2. where to place
+    el("section", { class: "rsec" }, el("h2", null, "1. ลงหมวดไหน และทำไม"), el("p", { class: "phint" }, "กดปกหรือชื่อ EP เพื่อดูคลิปตัวอย่างบน YouTube"),
+      el("div", { class: "pcards" }, N.plan.map((r, i) => {
+        const exs = D.eps.filter((e) => e.cat === r.c.name && !out(e)).sort((a, b) => b.views - a.views).slice(0, 3);
+        return el("div", { class: "pcard" },
+          exs[0] ? el("a", { class: "pcover", href: ytUrl(exs[0].vid), target: "_blank", rel: "noopener", title: "เปิดคลิปบน YouTube" }, thumb(exs[0].vid, "pthumb"), el("span", { class: "pplay" }, "▶"), el("span", { class: "pcover-cap" }, `EP.${exs[0].ep}`)) : null,
+          el("b", null, `${r.c.name}`), el("span", { class: "pnum" }, `ลง ${r.n} EP · ปกติได้ ${views(r.c.views)} วิว/EP`),
+          el("ul", { class: "pwhy" }, plainReason(r).map((t, j) => ed(`why${i}-${j}`, "li", t))),
+          el("div", { class: "plinks" }, el("span", null, "EP ตัวอย่าง:"), exs.map((e) => el("a", { href: ytUrl(e.vid), target: "_blank", rel: "noopener" }, thumb(e.vid, "plthumb"), `EP.${e.ep} ${e.title.slice(0, 34)}${e.title.length > 34 ? "…" : ""}`))));
+      }))),
+    // 3. who will see it
+    el("section", { class: "rsec" }, el("h2", null, "2. คนที่จะเห็นเป็นใคร"),
+      ed("who", "p", `จากคนที่คอมเม้นใน EP หมวดเหล่านี้ ราว ${pct(N.genShare(topGenName))} เป็น ${topGenName} · แฟนประจำ ${pct(N.loyMix("fan"))} · คนใหม่ที่แวะมา ${pct(N.loyMix("drift"))} · แต่ละคนเห็นโฆษณาเฉลี่ย ${N.freq.toFixed(1)} ครั้ง`),
+      vennBlock(N.plan),
+      el("p", { class: "plab" }, "วัย"), gbar(GENS.map((g) => ({ v: N.genShare(g), c: GHEX[g] }))),
+      el("p", { class: "plegend" }, GENS.map((g) => `${g} ${pct(N.genShare(g))}`).join("   ·   ")),
+      el("p", { class: "plab" }, "มาบ่อยแค่ไหน"), gbar([{ v: N.loyMix("fan"), c: "#0F2557" }, { v: N.loyMix("news"), c: "#64748B" }, { v: N.loyMix("drift"), c: "#CBD5E1" }]),
+      el("p", { class: "plegend" }, `แฟนประจำ ${pct(N.loyMix("fan"))}   ·   มาเป็นช่วงๆ ${pct(N.loyMix("news"))}   ·   คนใหม่ ${pct(N.loyMix("drift"))}`)),
+    // 4. the chosen ad format -> how people will talk about it
+    el("section", { class: "rsec" }, el("h2", null, "3. โฆษณาได้กี่แบบ และคนจะพูดถึงยังไง"),
+      ed("f-lead", "p", `รายการทำได้ ${FORMATS.length} รูปแบบ เรียงจากแบบที่คนพูดถึงมากที่สุดไปน้อยที่สุด เลือกได้ตามงบและความเหมาะกับสินค้า`),
+      FORMATS.map((f) => {
+        const I = FORMAT_INFO[f.id], mn = Math.round(I.perEp() * P.n);
+        return el("div", { class: "pfbox" },
+          el("div", { class: "pformat" }, el("span", { class: "plevel " + I.kind }, I.level), el("div", null, el("b", { class: "pfname" }, f.name), ed("f-what-" + f.id, "p", I.what))),
+          el("p", { class: "plab" }, "สิ่งที่คาดว่าจะเกิดในคอมเม้น"), el("ul", { class: "pwhy big" }, I.talk.map((t, j) => ed(`f-talk-${f.id}-${j}`, "li", t))),
+          ed("f-num-" + f.id, "p", mn ? `ถ้าลง ${P.n} EP คาดว่าจะมีคอมเม้นพูดถึงสินค้าราว ${mn} ครั้ง` : "ไม่คาดว่าจะมีคอมเม้นพูดถึงสินค้ามากนัก", { class: "ed pstrong" }),
+          ed("f-ev-" + f.id, "p", I.evidence(), { class: "ed psmall" }),
+          ed("f-tip-" + f.id, "p", "คำแนะนำ: " + I.tip, { class: "ed ptip" }));
+      }),
+      el("table", { class: "pcompare" }, el("thead", null, el("tr", null, el("th", null, "รูปแบบ"), el("th", null, "คนพูดถึง"))),
+        el("tbody", null, FORMATS.map((f) => el("tr", null, el("td", null, f.name), el("td", null, FORMAT_INFO[f.id].level)))))),
+    // 5. safety
+    el("section", { class: "rsec" }, el("h2", null, "4. ความปลอดภัยของแบรนด์"),
+      ed("safety", "p", P.safety.length ? `ไม่ลง EP ที่มีประเด็นอ่อนไหวระดับ${P.safety.join(" และ ")} หลังตัดออกแล้วยังมี EP ให้เลือก ${N.avail.map((a) => `${a.name} ${a.ok} จาก ${a.all} EP`).join(" · ")}` : "ลูกค้าไม่ได้ระบุข้อจำกัด ควรถามก่อนจองว่ารับประเด็นอ่อนไหว เช่น คดีทางเพศ หรือมีคนเสียชีวิต ได้ไหม")),
+    // 6. conversion
+    el("section", { class: "rsec" }, el("h2", null, "5. ยอดขาย (Conversion)"),
+      ed("conv", "p", est == null ? "ยังประเมินยอดขายไม่ได้ เพราะยังไม่มีข้อมูลยอดขายจริงจากแบรนด์ แนะนำให้ใช้โค้ดส่วนลดแยกทุก EP เพื่อวัดผลจริงในแคมเปญนี้" : `ถ้าสมมติว่าทุก 1,000 วิวมีคนใช้โค้ด ${P.rate} ครั้ง จะได้ราว ${fmt(est)} ครั้ง ตัวเลขนี้เป็นสมมติฐาน ยังไม่ได้พิสูจน์ด้วยข้อมูลจริง`)),
+    el("footer", { class: "rsec pfoot" }, el("p", { class: "plab" }, "ข้อควรรู้"),
+      el("ul", { class: "pwhy small" }, [
+        `ตัวเลขมาจากคนที่คอมเม้นบน YouTube ${D.n_eps} EP ปี 2569 (${fmt(D.n_people)} คน) ไม่ใช่คนดูทั้งหมด`,
+        "ยอดวิวและคอมเม้นเป็นค่ากลางของปีนี้ EP จริงอาจได้มากหรือน้อยกว่ามากตามความดังของเรื่อง",
+        `จำนวนคนไม่ซ้ำคลาดได้ราว ±${Math.round(D.reach.median_abs_error * 100)}% และวัยเป็นค่าประเมินจากข้อความ`,
+        `วัยคิดจากคนที่ประเมินได้เท่านั้น คนที่สัญญาณไม่พอ (ราว ${GEN_UNKNOWN}% ของกลุ่มตัวอย่าง) นับเป็น "ไม่ระบุ" และไม่รวมในสัดส่วน`,
+        "การจัดหมวด EP ตรวจแล้วตรงกับที่นักวิเคราะห์จัดไว้ 87% (Cohen's kappa 0.85)",
+        "ยอดขายและ conversion ยังไม่มีข้อมูลจริง ตัวเลขในหัวข้อ 5 มาจากสมมติฐานที่กรอกเอง",
+      ].map((t, j) => ed("note" + j, "li", t)))));
+  let tmr; paper.addEventListener("input", (e) => { if (!e.target.closest(".ed")) return; clearTimeout(tmr); tmr = setTimeout(() => { try { const s = {}; paper.querySelectorAll(".ed").forEach((x) => (s[x.dataset.k] = x.textContent)); localStorage.setItem(key, JSON.stringify(s)); } catch (err) { /* draft not kept */ } }, 400); });
+  const status = el("span", { class: "cap", role: "status" });
+  let editing = false;
+  const editBtn = el("button", { type: "button", class: "btn ghost", "aria-pressed": "false", onclick: () => { editing = !editing; paper.querySelectorAll(".ed").forEach((x) => x.contentEditable = String(editing)); paper.classList.toggle("editing", editing); editBtn.setAttribute("aria-pressed", String(editing)); editBtn.lastChild.textContent = editing ? "เสร็จสิ้นการแก้ไข" : "แก้ไขข้อความ"; status.textContent = editing ? "คลิกข้อความที่มีเส้นประเพื่อแก้ ระบบจำไว้ในเบราว์เซอร์นี้" : ""; } }, icon("M4 20h4L19 9l-4-4L4 16zM14 6l4 4"), "แก้ไขข้อความ");
+  const pdfBtn = el("button", { type: "button", class: "btn", onclick: () => exportPdf(paper, status, editBtn, () => editing) }, icon("M12 4v11M7 10l5 5 5-5M5 20h14"), "Export PDF");
+  return [
+    el("div", { class: "rtoolbar" }, el("button", { type: "button", class: "btn ghost", onclick: onBack }, "← แก้โจทย์"), el("span", { class: "grow" }), status, editBtn, pdfBtn),
+    el("div", { class: "paper-wrap" }, paper),
+  ];
+}
+
+async function exportPdf(paper, status, editBtn, isEditing) {
+  if (isEditing()) editBtn.click();
+  const say = (t) => (status.textContent = t);
+  let dl = null;
+  try { dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null; } catch (e) { dl = null; }
+  if (!dl) { say("Export PDF ใช้ได้เมื่อเปิดหน้านี้ใน claude.ai"); return; }
+  if (!window.html2canvas || !window.jspdf) { say("โหลดตัวสร้าง PDF ไม่สำเร็จ ลองรีเฟรชหน้า"); return; }
+  say("กำลังสร้าง PDF…");
+  try {
+    const { jsPDF } = window.jspdf, pdf = new jsPDF({ unit: "mm", format: "a4" });
+    const M = 12, W = 210 - 2 * M, H = 297 - 2 * M; let y = M;
+    for (const sec of paper.querySelectorAll(".rsec")) {
+      const cv = await window.html2canvas(sec, { scale: 2, backgroundColor: "#ffffff", logging: false });
+      const h = cv.height * W / cv.width;
+      if (y + h > M + H && y > M) { pdf.addPage(); y = M; }
+      if (h <= H) {
+        pdf.addImage(cv, "JPEG", M, y, W, h, undefined, "FAST");
+        const sr = sec.getBoundingClientRect(), k = W / sr.width;
+        sec.querySelectorAll("a[href^='https://']").forEach((a) => { const r = a.getBoundingClientRect(); pdf.link(M + (r.left - sr.left) * k, y + (r.top - sr.top) * k, r.width * k, r.height * k, { url: a.href }); });
+        y += h + 3; continue;
+      }
+      const pagePx = Math.floor(cv.width * H / W);           // section taller than a page: slice it
+      for (let top = 0; top < cv.height; top += pagePx) {
+        const part = document.createElement("canvas"); part.width = cv.width; part.height = Math.min(pagePx, cv.height - top);
+        part.getContext("2d").drawImage(cv, 0, top, cv.width, part.height, 0, 0, cv.width, part.height);
+        if (top > 0) { pdf.addPage(); y = M; }
+        pdf.addImage(part, "JPEG", M, y, W, part.height * W / cv.width, undefined, "FAST"); y += part.height * W / cv.width + 3;
+      }
+    }
+    const name = `ReachRadar_${(P.brand || P.campaign || "campaign").replace(/[\\/:*?"<>|]+/g, "").slice(0, 40)}.pdf`;
+    await dl.save({ filename: name, data: pdf.output("blob") });
+    say("บันทึก PDF แล้ว");
+  } catch (e) {
+    say(e && e.code === "declined" ? "ยกเลิกการบันทึก" : e && e.code === "rate_limited" ? "มีหน้าต่างบันทึกเปิดอยู่ ลองอีกครั้ง" : "สร้าง PDF ไม่สำเร็จ ลองอีกครั้ง");
+  }
+}
+
+// ---------- router ----------
+const RENDER = { home: pageHome, match: pageMatch, slots: pageSlots, packages: pagePackages, safety: pageSafety, audience: pageAudience, content: pageContent, brands: pageBrands, planner: pagePlanner };
+function nav(cur) {
+  $("#nav").replaceChildren(...PAGES.map((p) => p.group ? el("span", { class: "ngroup" }, p.group) : el("a", { href: "#" + p.id, class: p.cta ? "cta" : null, "aria-current": p.id === cur ? "page" : null }, icon(p.ico), p.name)));
+}
+function go(id) { if (location.hash !== "#" + id) location.hash = id; else route(); }
+function route() {
+  let id = (location.hash || "#home").slice(1); if (id === "content") id = "home";   // merged into the overview
+  const cur = RENDER[id] ? id : "home";
+  nav(cur); if (dlg.open) dlg.close(); tip.hidden = true;
+  $("#main").replaceChildren(RENDER[cur]()); window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", route);
+$("#foot-data").textContent = `ข้อมูล ${D.date_range[0]} ถึง ${D.date_range[1]} · อัปเดต ${D.generated.slice(0, 10)}`;
+route();
+})();
+</script>
+
+</body></html>
