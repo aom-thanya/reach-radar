@@ -346,9 +346,9 @@ function Paths({ t }: { t: Topic }) {
 const WHY = TOPICS_ALL.find((t) => t.title === "ทำไมต้องใช้ Network")!;
 const TOPICS = TOPICS_ALL.filter((t) => t !== WHY);
 /** -5 = cover (#models), -4 = guests, -3 = business objective, -2 = why network, -1 = overview, 0.. = #models/1.. */
-const readIdx = () => { const h = location.hash; if (h === "#models/guests") return -4; if (h === "#models/objective") return -3; if (h === "#models/why") return -2; if (h === "#models/overview") return -1; if (h === "#models/end") return TOPICS.length; if (h === "#models/final") return TOPICS.length + 1; if (h === "#models/graph") return TOPICS.length + 2; if (h === "#models/thanks") return TOPICS.length + 3; const m = /^#models\/(\d+)/.exec(h); if (!m) return -5; return Math.max(0, Math.min(TOPICS.length - 1, +m[1] - 1)); };
-const hashOf = (k: number) => (k > TOPICS.length + 2 ? "#models/thanks" : k > TOPICS.length + 1 ? "#models/graph" : k === TOPICS.length + 1 ? "#models/final" : k === TOPICS.length ? "#models/end" : k <= -5 ? "#models" : k === -4 ? "#models/guests" : k === -3 ? "#models/objective" : k === -2 ? "#models/why" : k === -1 ? "#models/overview" : `#models/${k + 1}`);
-const titleOf = (k: number) => (k > TOPICS.length + 2 ? "Thank you" : k > TOPICS.length + 1 ? "กราฟเครือข่าย 3 ฝั่ง" : k === TOPICS.length + 1 ? "ปิดท้าย 2" : k === TOPICS.length ? "ปิดท้าย" : k <= -5 ? "หน้าปก" : k === -4 ? "แขกรับเชิญ" : k === -3 ? "Business Objective" : k === -2 ? WHY.title : k === -1 ? "ภาพรวม Process" : TOPICS[k].title);
+const readIdx = () => { const h = location.hash; if (h === "#models/guests") return -4; if (h === "#models/objective") return -3; if (h === "#models/why") return -2; if (h === "#models/overview") return -1; if (h === "#models/end") return TOPICS.length; if (h === "#models/final") return TOPICS.length + 1; if (h === "#models/graph") return TOPICS.length + 2; if (h === "#models/measure") return TOPICS.length + 3; if (h === "#models/thanks") return TOPICS.length + 4; const m = /^#models\/(\d+)/.exec(h); if (!m) return -5; return Math.max(0, Math.min(TOPICS.length - 1, +m[1] - 1)); };
+const hashOf = (k: number) => (k > TOPICS.length + 3 ? "#models/thanks" : k > TOPICS.length + 2 ? "#models/measure" : k > TOPICS.length + 1 ? "#models/graph" : k === TOPICS.length + 1 ? "#models/final" : k === TOPICS.length ? "#models/end" : k <= -5 ? "#models" : k === -4 ? "#models/guests" : k === -3 ? "#models/objective" : k === -2 ? "#models/why" : k === -1 ? "#models/overview" : `#models/${k + 1}`);
+const titleOf = (k: number) => (k > TOPICS.length + 3 ? "Thank you" : k > TOPICS.length + 2 ? "วัด Conversion" : k > TOPICS.length + 1 ? "กราฟเครือข่าย 3 ฝั่ง" : k === TOPICS.length + 1 ? "ปิดท้าย 2" : k === TOPICS.length ? "ปิดท้าย" : k <= -5 ? "หน้าปก" : k === -4 ? "แขกรับเชิญ" : k === -3 ? "Business Objective" : k === -2 ? WHY.title : k === -1 ? "ภาพรวม Process" : TOPICS[k].title);
 
 /** live view counter for the title slides: counts up to ~200,000, then ticks up slowly like a live stream */
 function ViewCount({ className }: { className?: string }) {
@@ -391,6 +391,47 @@ function Guests({ onNext, end, img = "/guests.jpg", alt = "ประเด็น
       {sparks.map(([x, y], k) => <i key={k} className="m-spark gv-spark" aria-hidden="true" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${0.6 + k * 0.45}s` }} />)}
     </div>
     <div className="gv-badges"><ViewCount /><span className="gv-live" aria-hidden="true"><i />{end ? "ขอบคุณที่รับชม" : "ON AIR"}</span></div>
+  </div>;
+}
+
+/** next-step infographic: tag every slot with UTM + a unique code, then measure sales conversion per EP */
+function Measure({ onNext }: { onNext: () => void }) {
+  const steps: { t: string; d: ReactNode; ico: ReactNode }[] = [
+    { t: "ติด UTM + โค้ดต่อ EP", d: <><code>utm_content=ep2301</code><code>HONE2301</code><span>ใส่ในคำอธิบายคลิปและคอมเม้นปักหมุด</span></>,
+      ico: <svg viewBox="0 0 48 48"><path d="M20 28l8-8M17 31l-4 4a6 6 0 01-8-8l7-7a6 6 0 018 0M31 17l4-4a6 6 0 018 8l-7 7a6 6 0 01-8 0" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" /></svg> },
+    { t: "คนดูคลิก / ใช้โค้ด", d: <><span>คลิกลิงก์ UTM ไปหน้าสินค้า</span><span>ใช้โค้ดได้ 7 วันหลังออกอากาศ</span></>,
+      ico: <svg viewBox="0 0 48 48"><path d="M14 6l22 16-10 2 6 12-5 2-6-12-7 7z" fill="currentColor" /></svg> },
+    { t: "แบรนด์ส่งยอดรวม", d: <><span>คลิกและ session (Google Analytics)</span><span>ออเดอร์และยอดขายต่อโค้ด รายวัน</span></>,
+      ico: <svg viewBox="0 0 48 48"><path d="M8 40V22M20 40V12M32 40V26M44 40V8" stroke="currentColor" strokeWidth="6" strokeLinecap="round" /></svg> },
+    { t: "จับคู่กับสายคนดูของ EP", d: <><span>% ของแต่ละสาย Gen และความภักดี</span><span>จากเครือข่ายของ ReachRadar</span></>,
+      ico: <svg viewBox="0 0 48 48"><circle cx="12" cy="12" r="6" fill="currentColor" /><circle cx="36" cy="14" r="6" fill="currentColor" /><circle cx="24" cy="36" r="6" fill="currentColor" /><path d="M12 12l24 2-12 22z" fill="none" stroke="currentColor" strokeWidth="3" /></svg> },
+    { t: "วัด Conversion การขาย", d: <><span>ใช้โค้ดต่อ 1,000 วิว</span><span>เทียบ EP ที่สายตรงกลุ่ม vs ไม่ตรง</span></>,
+      ico: <svg viewBox="0 0 48 48"><path d="M6 10h36l-14 16v12l-8 4V26z" fill="currentColor" /></svg> },
+  ];
+  const funnel: [string, number, string][] = [["วิวของ EP", 100, "var(--m-c0)"], ["คลิกลิงก์ UTM", 62, "#4f74b8"], ["ใช้โค้ดส่วนลด", 34, "#d97706"], ["ยอดขาย (฿)", 20, "#dc0f2e"]];
+  return <div className="m-cover light" onClick={onNext} role="button" tabIndex={0} aria-label="วัด Conversion กดเพื่อไปหน้าถัดไป" onKeyDown={(e) => { if (e.key === "Enter") onNext(); }}>
+    <div className="m-cv bo ms">
+      <img className="bo-logo" src="/hone-logo.png" alt="โหนกระแส" />
+      <div className="bo-head">
+        <span className="bo-eyebrow">Next Step · วัดผลจริง</span>
+        <h1>ถ้าจะวัด Conversion: ติด UTM → วัด Conversion การขาย</h1>
+        <p>เปลี่ยนจากขาย “ความสนใจตรงกลุ่ม” เป็นขาย “ยอดขายที่วัดได้” ของแต่ละ EP</p>
+      </div>
+      <ol className="ms-flow">
+        <i className="ms-line" aria-hidden="true"><b /></i>
+        {steps.map((x, k) => <li key={k} style={{ animationDelay: `${0.5 + k * 0.25}s` }}><span className="ms-ico">{x.ico}</span><span className="ms-n">{k + 1}</span><h2>{x.t}</h2><div className="ms-d">{x.d}</div></li>)}
+      </ol>
+      <div className="ms-bottom">
+        <div className="ms-funnel"><h3>Funnel ต่อ EP</h3>{funnel.map(([l, w, c], k) => <div key={l} className="ms-fr"><span>{l}</span><i style={{ width: `${w}%`, background: c, animationDelay: `${1.9 + k * 0.2}s` }} /></div>)}<em>ภาพประกอบสัดส่วน ไม่ใช่ตัวเลขจริง · ตัวเลขจริงรอผล Pilot</em></div>
+        <div className="ms-formula"><h3>ตัวชี้วัด</h3>
+          <p><b>Conversion</b> = ยอดใช้โค้ด ÷ วิว × 1,000</p>
+          <p><b>CTR</b> = คลิก UTM ÷ วิว × 1,000</p>
+          <p><b>ยอดขายต่อ EP</b> = ผลรวมออเดอร์ของโค้ด EP นั้น</p>
+          <p className="ms-pilot">Pilot 60 EP · สุ่มลงโฆษณา 40 EP · อีก 20 EP เป็นฐานเทียบ</p>
+        </div>
+      </div>
+      <div className="bo-bar"><b>03</b><span>MEASURE CONVERSION</span></div>
+    </div>
   </div>;
 }
 
@@ -510,22 +551,24 @@ export default function Models() {
   const [present, setPresent] = useState(() => { try { return sessionStorage.getItem("rr-present") === "1"; } catch { return false; } });
   useEffect(() => { try { sessionStorage.setItem("rr-present", present ? "1" : "0"); } catch { /* storage off */ } }, [present]);
   const isGraph = i === TOPICS.length + 2;
-  const isThanks = i === TOPICS.length + 3;
+  const isMeasure = i === TOPICS.length + 3;
+  const isThanks = i === TOPICS.length + 4;
   const isEnd = i === TOPICS.length || i === TOPICS.length + 1;
   const t = i >= 0 && i < TOPICS.length ? TOPICS[i] : i === -2 ? WHY : null;
-  const cover = i <= -3 || isEnd || isThanks;
+  const cover = i <= -3 || isEnd || isThanks || isMeasure;
+  const lightSlide2 = isMeasure;
   const lightSlide = i === -3;
   useEffect(() => { const on = () => { setI(readIdx()); window.scrollTo(0, 0); }; addEventListener("hashchange", on); return () => removeEventListener("hashchange", on); }, []);
   useEffect(() => { window.scrollTo(0, 0); const old = document.title; return () => { document.title = old; }; }, []);
   useEffect(() => { document.title = `ReachRadar · ${t ? t.title : "ภาพรวม Process"}`; }, [t]);
-  const go = (k: number) => { location.hash = hashOf(Math.max(-5, Math.min(TOPICS.length + 3, k))); };
+  const go = (k: number) => { location.hash = hashOf(Math.max(-5, Math.min(TOPICS.length + 4, k))); };
   useEffect(() => {
-    const k = (e: KeyboardEvent) => { if (e.target instanceof HTMLInputElement) return; if (e.key === "p" || e.key === "P") setPresent((x) => !x); if ((e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") && i < TOPICS.length + 3) { e.preventDefault(); go(i + 1); } if (e.key === "PageUp" && i > -5) go(i - 1); if (e.key === "ArrowLeft" && i > -5) go(i - 1); };
+    const k = (e: KeyboardEvent) => { if (e.target instanceof HTMLInputElement) return; if (e.key === "p" || e.key === "P") setPresent((x) => !x); if ((e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") && i < TOPICS.length + 4) { e.preventDefault(); go(i + 1); } if (e.key === "PageUp" && i > -5) go(i - 1); if (e.key === "ArrowLeft" && i > -5) go(i - 1); };
     addEventListener("keydown", k); return () => removeEventListener("keydown", k);
   }, [i]);
 
   return (
-    <div className={`models k-${t ? t.kind : "ml"}${present ? " present" : ""}${cover ? " is-cover" : ""}${lightSlide ? " is-light" : ""}`}>
+    <div className={`models k-${t ? t.kind : "ml"}${present ? " present" : ""}${cover ? " is-cover" : ""}${lightSlide || lightSlide2 ? " is-light" : ""}`}>
       <header className="m-bar">
         <a className="m-home" href="#journey">← เรื่องเล่า</a>
         <nav className="m-dots" aria-label="เรื่อง">
@@ -538,13 +581,14 @@ export default function Models() {
           <a href="#models/end" title="ปิดท้าย" aria-label="ปิดท้าย" aria-current={i === TOPICS.length ? "page" : undefined} className={`ov k-sim${i > TOPICS.length ? " done" : ""}`} />
           <a href="#models/final" title="ปิดท้าย 2" aria-label="ปิดท้าย 2" aria-current={i === TOPICS.length + 1 ? "page" : undefined} className={`ov k-sim${i > TOPICS.length + 1 ? " done" : ""}`} />
           <a href="#models/graph" title="กราฟเครือข่าย 3 ฝั่ง" aria-label="กราฟเครือข่าย 3 ฝั่ง" aria-current={isGraph ? "page" : undefined} className={`ov k-net${i > TOPICS.length + 2 ? " done" : ""}`} />
+          <a href="#models/measure" title="วัด Conversion" aria-label="วัด Conversion" aria-current={isMeasure ? "page" : undefined} className={`ov k-sim${i > TOPICS.length + 3 ? " done" : ""}`} />
           <a href="#models/thanks" title="Thank you" aria-label="Thank you" aria-current={isThanks ? "page" : undefined} className="ov k-sim" />
         </nav>
         <button type="button" className="m-pbtn" aria-pressed={present} onClick={() => setPresent(!present)} title="สลับโหมดนำเสนอ (P)">{present ? "ออกจากโหมดนำเสนอ" : "โหมดนำเสนอ"}</button>
       </header>
 
-      <span className="m-pageno" aria-label="หน้า">{i + 6} / {TOPICS.length + 9}</span>
-      {isGraph ? <div className="m-graphonly m-viz" onClick={(e) => { if ((e.target as HTMLElement).closest(".m-tri")) return; go(i + 1); }}><TriNet /></div> : isThanks ? <ThankYou onNext={() => go(-5)} /> : i === TOPICS.length + 1 ? <Guests end img="/final.jpg" alt="ปิดท้าย · ดาว MADT และแบงค์ MADT (นามสมมุติ)" ratio="1670 / 942" onNext={() => go(i + 1)} /> : isEnd ? <Guests end onNext={() => go(i + 1)} /> : i === -5 ? <Cover onNext={() => go(-4)} /> : i === -4 ? <Guests onNext={() => go(-3)} /> : i === -3 ? <Objective onNext={() => go(-2)} /> : <main className={`m-page ${t ? (t.big ? "topic long big" : t.sample ? "topic long" : "topic") : "ov"}`} key={`${i}-${run}`}>
+      <span className="m-pageno" aria-label="หน้า">{i + 6} / {TOPICS.length + 10}</span>
+      {isGraph ? <div className="m-graphonly m-viz" onClick={(e) => { if ((e.target as HTMLElement).closest(".m-tri")) return; go(i + 1); }}><TriNet /></div> : isMeasure ? <Measure onNext={() => go(i + 1)} /> : isThanks ? <ThankYou onNext={() => go(-5)} /> : i === TOPICS.length + 1 ? <Guests end img="/final.jpg" alt="ปิดท้าย · ดาว MADT และแบงค์ MADT (นามสมมุติ)" ratio="1670 / 942" onNext={() => go(i + 1)} /> : isEnd ? <Guests end onNext={() => go(i + 1)} /> : i === -5 ? <Cover onNext={() => go(-4)} /> : i === -4 ? <Guests onNext={() => go(-3)} /> : i === -3 ? <Objective onNext={() => go(-2)} /> : <main className={`m-page ${t ? (t.big ? "topic long big" : t.sample ? "topic long" : "topic") : "ov"}`} key={`${i}-${run}`}>
         {!t ? <><Overview /><nav className="m-nav"><button type="button" onClick={() => go(-2)}>← {WHY.title}</button><button type="button" onClick={() => go(0)}>{TOPICS[0].title} →</button></nav></> : <>
         <div className="m-title">
           <div><span className="m-ch">{t === WHY ? "เริ่มต้น" : CHAPTERS[t.ch]}</span><h1>{t.title}</h1>{present && <p className="m-takeaway">{t.read}</p>}</div>

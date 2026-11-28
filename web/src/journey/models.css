@@ -526,3 +526,35 @@
 .m-graphonly .m-tri text.t { font-size: 13px; }
 
 .cv-word.ty { font-size: 8.6cqw; }
+
+/* measure-conversion infographic (light slide, 16:9 container units) */
+.ms .bo-head h1 { font-size: 2.35cqw; }
+.ms-flow { list-style: none; margin: 0; padding: 0; position: absolute; left: 8.9cqw; right: 8.9cqw; top: 14.4cqw; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1.4cqw; align-items: stretch; }
+.ms-line { position: absolute; left: 6%; right: 6%; top: 3.1cqw; height: .35cqw; background: #e5e7eb; border-radius: 99px; z-index: 0; overflow: hidden; }
+.ms-line b { position: absolute; inset: 0; background: linear-gradient(90deg, #1e40af, #dc0f2e); transform-origin: left; animation: boBar 1.6s cubic-bezier(.2, .9, .25, 1) .5s both; }
+.ms-flow li { position: relative; z-index: 1; background: #fff; border: .12cqw solid #e5e7eb; border-radius: 1.4cqw; padding: 1cqw 1cqw 1.2cqw; display: grid; justify-items: center; align-content: start; text-align: center; gap: .5cqw; box-shadow: 0 .3cqw 1.2cqw rgba(15, 27, 61, .06); animation: boPop .6s cubic-bezier(.2, 1.3, .4, 1) both; }
+.ms-ico { width: 4.4cqw; height: 4.4cqw; border-radius: 50%; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, #1e40af, #7c3aed); margin-top: -.2cqw; }
+.ms-flow li:nth-child(n+5) .ms-ico, .ms-flow li:last-child .ms-ico { background: linear-gradient(135deg, #dc0f2e, #d97706); }
+.ms-ico svg { width: 2.4cqw; height: 2.4cqw; }
+.ms-n { font: 700 1cqw var(--f-num); color: #9ca3af; }
+.ms-flow h2 { margin: 0; font: 800 1.45cqw/1.25 var(--f-display); color: #0f1b3d; }
+.ms-d { display: grid; gap: .35cqw; justify-items: center; }
+.ms-d span { font: 400 1.05cqw/1.35 var(--f-body); color: #4b5563; }
+.ms-d code { font: 600 .95cqw var(--f-num); background: #eef2ff; color: #1e40af; padding: .2cqw .5cqw; border-radius: .4cqw; }
+.ms-bottom { position: absolute; left: 8.9cqw; right: 8.9cqw; top: 34cqw; display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.6cqw; }
+.ms-bottom h3 { margin: 0 0 .6cqw; font: 800 1.35cqw var(--f-display); color: #0f1b3d; }
+.ms-funnel, .ms-formula { background: #f8fafc; border-radius: 1.4cqw; padding: .9cqw 1.6cqw; animation: mfade .6s 1.7s both; }
+.ms-fr { display: grid; grid-template-columns: 10cqw minmax(0, 1fr); align-items: center; gap: .8cqw; margin-bottom: .45cqw; }
+.ms-fr span { font: 600 1.05cqw var(--f-body); color: #1f2937; }
+.ms-fr i { display: block; height: 1.5cqw; border-radius: .4cqw; transform-origin: left; animation: boBar .8s cubic-bezier(.2, .9, .25, 1) both; }
+.ms-funnel em { font-style: normal; font-size: .85cqw; color: #9ca3af; }
+.ms-formula p { margin: 0 0 .45cqw; font: 400 1.1cqw/1.45 var(--f-body); color: #1f2937; }
+.ms-formula b { color: #dc0f2e; }
+.ms-formula .ms-pilot { margin-top: .7cqw; padding-top: .6cqw; border-top: .1cqw dashed #d1d5db; color: #4b5563; font-size: 1cqw; }
+.ms .bo-bar { bottom: 2cqw; height: 4cqw; }
+.ms .bo-bar b, .ms .bo-bar span { font-size: 2.2cqw; }
+@media (prefers-reduced-motion: reduce) { .ms * { animation: none !important; } }
+
+/* values inside the process steps must not inherit the big model-name style of .m-box b */
+.m-box .m-box-how b, .models.present .m-box .m-box-how b { font: 600 12px/1.3 var(--f-num); color: var(--ink); }
+.m-box .m-box-how .hw-bars > div { grid-template-columns: 76px minmax(0, 1fr) 40px; }
