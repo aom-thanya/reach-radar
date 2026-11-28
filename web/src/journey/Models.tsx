@@ -345,21 +345,92 @@ function Paths({ t }: { t: Topic }) {
 /** the "why network" page opens the deck; the overview comes next; then the numbered steps */
 const WHY = TOPICS_ALL.find((t) => t.title === "ทำไมต้องใช้ Network")!;
 const TOPICS = TOPICS_ALL.filter((t) => t !== WHY);
-/** -3 = cover (#models), -2 = why network (#models/why), -1 = overview (#models/overview), 0.. = #models/1.. */
-const readIdx = () => { const h = location.hash; if (h === "#models/why") return -2; if (h === "#models/overview") return -1; const m = /^#models\/(\d+)/.exec(h); if (!m) return -3; return Math.max(0, Math.min(TOPICS.length - 1, +m[1] - 1)); };
-const hashOf = (k: number) => (k <= -3 ? "#models" : k === -2 ? "#models/why" : k === -1 ? "#models/overview" : `#models/${k + 1}`);
-const titleOf = (k: number) => (k <= -3 ? "หน้าปก" : k === -2 ? WHY.title : k === -1 ? "ภาพรวม Process" : TOPICS[k].title);
+/** -5 = cover (#models), -4 = guests, -3 = business objective, -2 = why network, -1 = overview, 0.. = #models/1.. */
+const readIdx = () => { const h = location.hash; if (h === "#models/guests") return -4; if (h === "#models/objective") return -3; if (h === "#models/why") return -2; if (h === "#models/overview") return -1; if (h === "#models/end") return TOPICS.length; if (h === "#models/final") return TOPICS.length + 1; if (h === "#models/graph") return TOPICS.length + 2; if (h === "#models/thanks") return TOPICS.length + 3; const m = /^#models\/(\d+)/.exec(h); if (!m) return -5; return Math.max(0, Math.min(TOPICS.length - 1, +m[1] - 1)); };
+const hashOf = (k: number) => (k > TOPICS.length + 2 ? "#models/thanks" : k > TOPICS.length + 1 ? "#models/graph" : k === TOPICS.length + 1 ? "#models/final" : k === TOPICS.length ? "#models/end" : k <= -5 ? "#models" : k === -4 ? "#models/guests" : k === -3 ? "#models/objective" : k === -2 ? "#models/why" : k === -1 ? "#models/overview" : `#models/${k + 1}`);
+const titleOf = (k: number) => (k > TOPICS.length + 2 ? "Thank you" : k > TOPICS.length + 1 ? "กราฟเครือข่าย 3 ฝั่ง" : k === TOPICS.length + 1 ? "ปิดท้าย 2" : k === TOPICS.length ? "ปิดท้าย" : k <= -5 ? "หน้าปก" : k === -4 ? "แขกรับเชิญ" : k === -3 ? "Business Objective" : k === -2 ? WHY.title : k === -1 ? "ภาพรวม Process" : TOPICS[k].title);
 
-/** cover slide: the team's key visual with a slow zoom, light sweep and sparkles on "LIVE" */
-function Cover({ onNext }: { onNext: () => void }) {
-  const sparks = [[63, 60], [78, 62], [86, 70], [70, 74], [91, 64], [57, 72], [82, 58]];
-  return <div className="m-cover" onClick={onNext} role="button" tabIndex={0} aria-label="เริ่มนำเสนอ กดเพื่อไปหน้าถัดไป" onKeyDown={(e) => { if (e.key === "Enter") onNext(); }}>
-    <div className="m-cover-img"><img src="/cover.jpg" alt="ประเด็นร้อน LIVE · ทีม ReachRadar" />
-      <i className="m-cover-sweep" aria-hidden="true" />
-      <i className="m-cover-glow" aria-hidden="true" />
-      {sparks.map(([x, y], k) => <i key={k} className="m-spark" aria-hidden="true" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${0.6 + k * 0.45}s` }} />)}
+/** live view counter for the title slides: counts up to ~200,000, then ticks up slowly like a live stream */
+function ViewCount({ className }: { className?: string }) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    const target = 200000, t0 = performance.now(), dur = 2200;
+    let raf = 0, tick = 0;
+    const step = (now: number) => { const k = Math.min(1, (now - t0) / dur); setN(Math.round(target * (1 - (1 - k) ** 3))); if (k < 1) raf = requestAnimationFrame(step); else tick = window.setInterval(() => setN((x) => x + Math.floor(Math.random() * 37) + 3), 900); };
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) setN(target); else raf = requestAnimationFrame(step);
+    return () => { cancelAnimationFrame(raf); clearInterval(tick); };
+  }, []);
+  return <span className={"m-views" + (className ? " " + className : "")} aria-label={`${fmt(n)} views`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12z" fill="none" stroke="currentColor" strokeWidth="2" /><circle cx="12" cy="12" r="3.2" fill="currentColor" /></svg><b>{fmt(n)}</b> views</span>;
+}
+
+/** business objective slide: the two business questions (ก Gen × content, ข retention vs acquisition) */
+function Objective({ onNext }: { onNext: () => void }) {
+  return <div className="m-cover light" onClick={onNext} role="button" tabIndex={0} aria-label="Business Objective กดเพื่อไปหน้าถัดไป" onKeyDown={(e) => { if (e.key === "Enter") onNext(); }}>
+    <div className="m-cv bo">
+      <img className="bo-logo" src="/hone-logo.png" alt="โหนกระแส" />
+      <div className="bo-head">
+        <span className="bo-eyebrow">Problem Framing</span>
+        <h1>ขายโฆษณาให้แบรนด์: ซื้อคอนเทนต์ไหน ให้แบรนด์เข้าถึงคนที่ใช่?</h1>
+        <p>มุมมองเครือข่ายเปลี่ยนคำถาม: ไม่ใช่แค่ “ใครดูเยอะ” แต่ต้องรู้ว่า “ใครดู และใครเพิ่งเข้ามา”</p>
+      </div>
+      <section className="bo-panel a"><span className="bo-pill">คำถาม ก</span><h2>Gen ไหน อินกับคอนเทนต์อะไร?</h2><p>จับคู่คอนเทนต์กับแต่ละ Gen เพื่อขายโฆษณาให้ตรงกลุ่ม</p><img className="bo-art gens" src="/bo-gens.png" alt="" aria-hidden="true" /></section>
+      <section className="bo-panel b"><span className="bo-pill">คำถาม ข</span><h2>Retention vs Acquisition</h2><p>หัวข้อไหนรักษาคนเก่า หัวข้อไหนดึงคนใหม่?</p><img className="bo-art ret" src="/bo-retention.png" alt="" aria-hidden="true" /></section>
+      <img className="bo-person" src="/bo-presenter.png" alt="" aria-hidden="true" />
+      <div className="bo-bar"><b>02</b><span>BUSINESS OBJECTIVE</span></div>
     </div>
-    <span className="m-cover-live" aria-hidden="true"><i />ON AIR</span>
+  </div>;
+}
+
+/** guests slide: the team's key visual with a slow zoom, light sweep and sparkles on "LIVE" */
+function Guests({ onNext, end, img = "/guests.jpg", alt = "ประเด็นร้อน LIVE · ทีม ReachRadar", ratio = "1920 / 1081" }: { onNext: () => void; end?: boolean; img?: string; alt?: string; ratio?: string }) {
+  const sparks = [[63, 60], [78, 62], [86, 70], [70, 74], [91, 64], [57, 72], [82, 58]];
+  return <div className="m-cover" onClick={onNext} role="button" tabIndex={0} aria-label="แขกรับเชิญ กดเพื่อไปหน้าถัดไป" onKeyDown={(e) => { if (e.key === "Enter") onNext(); }}>
+    <div className="gv-img" style={{ aspectRatio: ratio, width: `min(100vw, calc(100dvh * ${ratio.replace(" / ", " / ")}))` }}><img src={img} alt={alt} />
+      <i className="gv-sweep" aria-hidden="true" />
+      <i className="gv-glow" aria-hidden="true" />
+      {sparks.map(([x, y], k) => <i key={k} className="m-spark gv-spark" aria-hidden="true" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${0.6 + k * 0.45}s` }} />)}
+    </div>
+    <div className="gv-badges"><ViewCount /><span className="gv-live" aria-hidden="true"><i />{end ? "ขอบคุณที่รับชม" : "ON AIR"}</span></div>
+  </div>;
+}
+
+/** closing slide: "Thank you" title card in the cover's style */
+function ThankYou({ onNext }: { onNext: () => void }) {
+  const sparks = [[70, 20], [88, 14], [93, 40], [76, 46], [64, 30], [30, 30], [48, 22]];
+  return <div className="m-cover" onClick={onNext} role="button" tabIndex={0} aria-label="ขอบคุณ กดเพื่อกลับหน้าปก" onKeyDown={(e) => { if (e.key === "Enter") onNext(); }}>
+    <div className="m-cv">
+      <i className="cv-light" aria-hidden="true" />
+      <img className="cv-logo" src="/hone-logo.png" alt="โหนกระแส" />
+      {sparks.map(([x, y], k) => <i key={k} className="m-spark" aria-hidden="true" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${1.2 + k * 0.4}s` }} />)}
+      <img className="cv-person" src="/cover-presenter.png" alt="" aria-hidden="true" />
+      <div className="cv-text">
+        <span className="cv-eyebrow">ReachRadar · โหนกระแส · MADT 7202</span>
+        <h1 className="cv-word ty"><span>Thank you</span><span>ขอบคุณครับ</span></h1>
+        <p className="cv-sub">ถาม–ตอบ · Q&amp;A</p>
+      </div>
+      <div className="cv-ticker"><b><i />LIVE</b><span>จบรายการ | ตี๋อย่าทิ้งพี่ #ep3 · แล้วพบกันใหม่</span></div>
+      <ViewCount className="cv" />
+    </div>
+  </div>;
+}
+
+/** cover slide: title card in the style of the team's design (gradient, silver wordmark, show logo, presenter, LIVE ticker) */
+function Cover({ onNext }: { onNext: () => void }) {
+  const sparks = [[70, 20], [88, 14], [93, 40], [76, 46], [64, 30]];
+  return <div className="m-cover" onClick={onNext} role="button" tabIndex={0} aria-label="เริ่มนำเสนอ กดเพื่อไปหน้าถัดไป" onKeyDown={(e) => { if (e.key === "Enter") onNext(); }}>
+    <div className="m-cv">
+      <i className="cv-light" aria-hidden="true" />
+      <img className="cv-logo" src="/hone-logo.png" alt="โหนกระแส" />
+      {sparks.map(([x, y], k) => <i key={k} className="m-spark" aria-hidden="true" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${1.6 + k * 0.5}s` }} />)}
+      <img className="cv-person" src="/cover-presenter.png" alt="" aria-hidden="true" />
+      <div className="cv-text">
+        <span className="cv-eyebrow">MADT 7202 · Web &amp; Social Network Analytics</span>
+        <h1 className="cv-word"><span>ReachRadar</span><span>โหนกระแส</span></h1>
+        <p className="cv-sub">ขายโฆษณาให้ตรงคน: ควรซื้อ content ไหน เพื่อเข้าถึงผู้ชมกลุ่มไหน</p>
+      </div>
+      <div className="cv-ticker"><b><i />LIVE</b><span>ตี๋อย่าทิ้งพี่ | #ep3 #เรื่องชาวบ้านคืองานของเรา</span></div>
+      <ViewCount className="cv" />
+    </div>
     <span className="m-cover-hint">แตะหรือกด → เพื่อเริ่ม</span>
   </div>;
 }
@@ -438,32 +509,42 @@ export default function Models() {
   const [run, setRun] = useState(0);
   const [present, setPresent] = useState(() => { try { return sessionStorage.getItem("rr-present") === "1"; } catch { return false; } });
   useEffect(() => { try { sessionStorage.setItem("rr-present", present ? "1" : "0"); } catch { /* storage off */ } }, [present]);
-  const t = i >= 0 ? TOPICS[i] : i === -2 ? WHY : null;
-  const cover = i === -3;
+  const isGraph = i === TOPICS.length + 2;
+  const isThanks = i === TOPICS.length + 3;
+  const isEnd = i === TOPICS.length || i === TOPICS.length + 1;
+  const t = i >= 0 && i < TOPICS.length ? TOPICS[i] : i === -2 ? WHY : null;
+  const cover = i <= -3 || isEnd || isThanks;
+  const lightSlide = i === -3;
   useEffect(() => { const on = () => { setI(readIdx()); window.scrollTo(0, 0); }; addEventListener("hashchange", on); return () => removeEventListener("hashchange", on); }, []);
   useEffect(() => { window.scrollTo(0, 0); const old = document.title; return () => { document.title = old; }; }, []);
   useEffect(() => { document.title = `ReachRadar · ${t ? t.title : "ภาพรวม Process"}`; }, [t]);
-  const go = (k: number) => { location.hash = hashOf(Math.max(-3, Math.min(TOPICS.length - 1, k))); };
+  const go = (k: number) => { location.hash = hashOf(Math.max(-5, Math.min(TOPICS.length + 3, k))); };
   useEffect(() => {
-    const k = (e: KeyboardEvent) => { if (e.target instanceof HTMLInputElement) return; if (e.key === "p" || e.key === "P") setPresent((x) => !x); if ((e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") && i < TOPICS.length - 1) { e.preventDefault(); go(i + 1); } if (e.key === "PageUp" && i > -3) go(i - 1); if (e.key === "ArrowLeft" && i > -3) go(i - 1); };
+    const k = (e: KeyboardEvent) => { if (e.target instanceof HTMLInputElement) return; if (e.key === "p" || e.key === "P") setPresent((x) => !x); if ((e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") && i < TOPICS.length + 3) { e.preventDefault(); go(i + 1); } if (e.key === "PageUp" && i > -5) go(i - 1); if (e.key === "ArrowLeft" && i > -5) go(i - 1); };
     addEventListener("keydown", k); return () => removeEventListener("keydown", k);
   }, [i]);
 
   return (
-    <div className={`models k-${t ? t.kind : "ml"}${present ? " present" : ""}${cover ? " is-cover" : ""}`}>
+    <div className={`models k-${t ? t.kind : "ml"}${present ? " present" : ""}${cover ? " is-cover" : ""}${lightSlide ? " is-light" : ""}`}>
       <header className="m-bar">
         <a className="m-home" href="#journey">← เรื่องเล่า</a>
         <nav className="m-dots" aria-label="เรื่อง">
-          <a href="#models" title="หน้าปก" aria-label="หน้าปก" aria-current={cover ? "page" : undefined} className={`ov k-sim${i > -3 ? " done" : ""}`} />
+          <a href="#models" title="หน้าปก" aria-label="หน้าปก" aria-current={i === -5 ? "page" : undefined} className={`ov k-sim${i > -5 ? " done" : ""}`} />
+          <a href="#models/guests" title="แขกรับเชิญ" aria-label="แขกรับเชิญ" aria-current={i === -4 ? "page" : undefined} className={`ov k-sim${i > -4 ? " done" : ""}`} />
+          <a href="#models/objective" title="Business Objective" aria-label="Business Objective" aria-current={i === -3 ? "page" : undefined} className={`ov k-sim${i > -3 ? " done" : ""}`} />
           <a href="#models/why" title={WHY.title} aria-label={WHY.title} aria-current={i === -2 ? "page" : undefined} className={`ov k-net${i > -2 ? " done" : ""}`} />
           <a href="#models/overview" title="ภาพรวม" aria-label="ภาพรวม Process" aria-current={i === -1 ? "page" : undefined} className={`ov k-ml${i >= 0 ? " done" : ""}`} />
           {TOPICS.map((x, k) => <a key={k} href={`#models/${k + 1}`} title={`${k + 1}. ${x.title}`} aria-label={`${k + 1}. ${x.title}`} aria-current={k === i ? "page" : undefined} className={`k-${x.kind}${k < i ? " done" : ""}`} />)}
+          <a href="#models/end" title="ปิดท้าย" aria-label="ปิดท้าย" aria-current={i === TOPICS.length ? "page" : undefined} className={`ov k-sim${i > TOPICS.length ? " done" : ""}`} />
+          <a href="#models/final" title="ปิดท้าย 2" aria-label="ปิดท้าย 2" aria-current={i === TOPICS.length + 1 ? "page" : undefined} className={`ov k-sim${i > TOPICS.length + 1 ? " done" : ""}`} />
+          <a href="#models/graph" title="กราฟเครือข่าย 3 ฝั่ง" aria-label="กราฟเครือข่าย 3 ฝั่ง" aria-current={isGraph ? "page" : undefined} className={`ov k-net${i > TOPICS.length + 2 ? " done" : ""}`} />
+          <a href="#models/thanks" title="Thank you" aria-label="Thank you" aria-current={isThanks ? "page" : undefined} className="ov k-sim" />
         </nav>
         <button type="button" className="m-pbtn" aria-pressed={present} onClick={() => setPresent(!present)} title="สลับโหมดนำเสนอ (P)">{present ? "ออกจากโหมดนำเสนอ" : "โหมดนำเสนอ"}</button>
-        <span className="m-count num">{cover ? "หน้าปก" : i === -2 ? "เริ่มต้น" : i === -1 ? "ภาพรวม" : `${i + 1}/${TOPICS.length}`}</span>
       </header>
 
-      {cover ? <Cover onNext={() => go(-2)} /> : <main className={`m-page ${t ? (t.big ? "topic long big" : t.sample ? "topic long" : "topic") : "ov"}`} key={`${i}-${run}`}>
+      <span className="m-pageno" aria-label="หน้า">{i + 6} / {TOPICS.length + 9}</span>
+      {isGraph ? <div className="m-graphonly m-viz" onClick={(e) => { if ((e.target as HTMLElement).closest(".m-tri")) return; go(i + 1); }}><TriNet /></div> : isThanks ? <ThankYou onNext={() => go(-5)} /> : i === TOPICS.length + 1 ? <Guests end img="/final.jpg" alt="ปิดท้าย · ดาว MADT และแบงค์ MADT (นามสมมุติ)" ratio="1670 / 942" onNext={() => go(i + 1)} /> : isEnd ? <Guests end onNext={() => go(i + 1)} /> : i === -5 ? <Cover onNext={() => go(-4)} /> : i === -4 ? <Guests onNext={() => go(-3)} /> : i === -3 ? <Objective onNext={() => go(-2)} /> : <main className={`m-page ${t ? (t.big ? "topic long big" : t.sample ? "topic long" : "topic") : "ov"}`} key={`${i}-${run}`}>
         {!t ? <><Overview /><nav className="m-nav"><button type="button" onClick={() => go(-2)}>← {WHY.title}</button><button type="button" onClick={() => go(0)}>{TOPICS[0].title} →</button></nav></> : <>
         <div className="m-title">
           <div><span className="m-ch">{t === WHY ? "เริ่มต้น" : CHAPTERS[t.ch]}</span><h1>{t.title}</h1>{present && <p className="m-takeaway">{t.read}</p>}</div>
@@ -508,7 +589,7 @@ export default function Models() {
         <nav className="m-nav">
           <button type="button" onClick={() => go(i - 1)}>← {titleOf(i - 1)}</button>
           <button type="button" className="m-replay" onClick={() => setRun((r) => r + 1)}>เล่นซ้ำ</button>
-          <button type="button" onClick={() => go(i + 1)} disabled={i === TOPICS.length - 1}>{i < TOPICS.length - 1 ? titleOf(i + 1) : "จบ"} →</button>
+          <button type="button" onClick={() => go(i + 1)}>{titleOf(i + 1)} →</button>
         </nav>
         </>}
       </main>}
