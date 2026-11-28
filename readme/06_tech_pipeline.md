@@ -32,6 +32,7 @@
 | `19_thumbnails.py` | ดึงปกวิดีโอ YouTube ทุก EP ย่อด้วย `sips` ให้ `18_build_backoffice.py` คัดลอกไปที่ `web/public/thumbs/` (รันก่อน 18) | `data/processed/thumbs/*.jpg` |
 | `20_unique_reach.py` | คนไม่ซ้ำและความถี่ของแพ็กเกจ: เส้นคนไม่ซ้ำรายหมวด + Sainsbury + ปรับเทียบด้วยการจำลอง (~20 วินาที รันก่อน 18) | `data/processed/unique_reach.json` |
 | `21_category_kappa.py` | ตรวจหมวด EP: Claude จัดใหม่แบบไม่เห็นคำตอบ เทียบกับคน (39 EP) และกับ Claude รอบแรก (ชุดสุ่ม) รายงาน % ตรงกัน Wilson CI และ Cohen's kappa | `eda/category_kappa.txt` |
+| `24_category_centrality.py` | Centrality ของกราฟหมวด ↔ หมวด (strength, betweenness, cross strength) จาก `web_src/data.json` (ต้องรัน `03_analyze.py` ก่อน) | `data/processed/category_centrality.csv` |
 | `03_analyze.py` | รวมทุกอย่าง: คน → Gen + ความภักดี → สรุปรายหมวดและราย EP → Network | `users.csv.gz`, `category_summary.csv`, `ep_summary.csv`, `web_src/data.json` |
 | `04_make_sample.py [N_PER]` | Gen ขั้น 2: สุ่มแบบแบ่งชั้นตาม K = 3 กลุ่มละ 1,500 คน ไม่เอาคนในชุดเฉลย แบ่งชุดละ 150 คน ให้ Claude อ่าน | `data/labels/sample.csv`, `data/labels/todo/batch_NNN.txt` แล้ว Claude ตอบที่ `data/labels/done/batch_NNN.csv` |
 | `05_build_dashboard.py` | Dashboard ชุดแรก (เลิกใช้บนเว็บแล้ว) ฝังข้อมูลลงแม่แบบ `web_src/dashboard_template.html` | `web_src/old/site_index.html` (เปิดดูในเครื่อง) |

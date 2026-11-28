@@ -63,6 +63,8 @@ const labSplit = (() => { const raw = [labN.Z, labN.Y, labN.X, labN.U].map((x) =
 const labCol = (i: number) => (i < labSplit[0] ? "var(--gz)" : i < labSplit[0] + labSplit[1] ? "var(--gy)" : i < labSplit[0] + labSplit[1] + labSplit[2] ? "var(--gx)" : "var(--m-dim)");
 const aired = (D.communities[0].aired ?? {}) as Record<string, number>;
 
+/** bridge between the two Louvain clusters: highest cross-cluster Jaccard strength (scripts/24_category_centrality.py) */
+const BRIDGE = "ข้อพิพาท & คดีความ";
 function CatNet() {
   const cx = VW / 2, cy = VH / 2, rad = 104, order = [...CATS.filter((c) => !QUIET.has(c)), ...CATS.filter((c) => QUIET.has(c))];
   const p: Record<string, { x: number; y: number; a: number; r: number }> = {};
@@ -71,6 +73,7 @@ function CatNet() {
   return <Svg label="เครือข่ายคนดูร่วมของ 10 หมวด น้ำหนัก Jaccard">
     {E.map((e, k) => { const a = p[e.a], b = p[e.b], top = e.w > 0.17, same = QUIET.has(e.a) === QUIET.has(e.b);
       return <line key={k} className="g fade" style={{ ...st(k, E.length), stroke: top ? "var(--ink)" : same ? (QUIET.has(e.a) ? "var(--m-c1)" : "var(--m-c0)") : "var(--m-dim)", strokeOpacity: top ? 0.9 : 0.15 + e.w * 3 }} x1={a.x} y1={a.y} x2={b.x} y2={b.y} strokeWidth={e.w * 30} strokeLinecap="round" />; })}
+    {p[BRIDGE] && <circle className="g fade" style={st(0, 1, 1.4)} cx={p[BRIDGE].x} cy={p[BRIDGE].y} r={p[BRIDGE].r + 6} fill="none" stroke="var(--ink)" strokeWidth={1.6} strokeDasharray="3 3" />}
     {order.map((c, i) => { const q2 = p[c], ca = Math.cos(q2.a), lx = cx + (rad + q2.r + 7) * ca, ly = cy + (rad + q2.r + 7) * Math.sin(q2.a);
       return <g key={c}><circle className="g pop nn" style={{ ...st(i, 10, 0.6), fill: QUIET.has(c) ? "var(--m-c1)" : "var(--m-c0)" }} cx={q2.x} cy={q2.y} r={q2.r} />
         <text x={lx} y={ly + (Math.sin(q2.a) > 0.5 ? 11 : Math.sin(q2.a) < -0.5 ? -2 : 4)} textAnchor={Math.abs(ca) < 0.25 ? "middle" : ca > 0 ? "start" : "end"} className="t">{SHORT[c]}</text></g>; })}
@@ -203,6 +206,70 @@ function PersonMini() {
   </Svg>;
 }
 
+/* ---------- entity resolution: made-up comment feed → one profile per person (illustration, no real handles/text) ---------- */
+type EntP = "a" | "b" | "c" | "s";
+const ENT_INI: Record<EntP, string> = { a: "ก", b: "ข", c: "ค", s: "ส" };
+const ENT_ID: Record<EntP, string> = { a: "UC•••a1", b: "UC•••7f", c: "UC•••c3", s: "UC•••x9" };
+const ENT_FEED: [EntP, string, number, string, string?][] = [
+  ["a", "@ผู้ชม_ก", 2269, "รอตอนต่อไปเลยค่ะ"],
+  ["b", "@ผู้ชม_ข", 2269, "ขอบคุณทีมงานที่ตามเรื่องนี้ครับ"],
+  ["s", "@ผู้ชม_ส", 2269, "หารายได้เสริม ทักมาเลย!!"],
+  ["c", "@ผู้ชม_ค", 2271, "เรื่องนี้ต้องได้ความจริง"],
+  ["a", "@ผู้ชม_ก", 2271, "ดูจบแล้วเศร้ามาก"],
+  ["s", "@ผู้ชม_ส", 2271, "หารายได้เสริม ทักมาเลย!!"],
+  ["a", "@ก_ชื่อใหม่", 2280, "ตามมาจากตอนที่แล้วค่ะ", "เปลี่ยนชื่อ"],
+  ["c", "@ผู้ชม_ค", 2280, "ขอให้จบดีนะ"],
+  ["s", "@ผู้ชม_ส", 2280, "หารายได้เสริม ทักมาเลย!!"],
+];
+function EntIn() {
+  return <div className="ent-feed" aria-label="ตัวอย่างคอมเม้นสมมติ 9 แถว">
+    {ENT_FEED.map(([p, h, ep, txt, tag], k) => <div key={k} className={`ent-c p-${p} g fade`} style={st(k, ENT_FEED.length, 0.3)}>
+      <span className="av" aria-hidden="true">{ENT_INI[p]}</span>
+      <div><div className="h">{h}{tag && <em>{tag}</em>}<code>{ENT_ID[p]}</code><span className="ep">EP.{ep}</span></div><p>{txt}</p></div>
+    </div>)}
+  </div>;
+}
+function EntOut() {
+  const people: [EntP, string, string[], string?][] = [["a", "คน 1", ["@ผู้ชม_ก", "@ก_ชื่อใหม่"], "เปลี่ยนชื่อ แต่ id เดิม = คนเดียวกัน"], ["b", "คน 2", ["@ผู้ชม_ข"]], ["c", "คน 3", ["@ผู้ชม_ค"]]];
+  const eps = (p: EntP) => ENT_FEED.filter((r) => r[0] === p).map((r) => r[2]);
+  return <div className="ent-out">
+    {people.map(([p, name, hs, note], k) => <div key={p} className={`ent-p p-${p} g pop`} style={st(k, 4, 2.1)}>
+      <span className="av" aria-hidden="true">{ENT_INI[p]}</span>
+      <div><div className="h"><b>{name}</b><code>{ENT_ID[p]}</code></div><div className="hs">{hs.join(" · ")}</div>{note && <div className="ent-note">{note}</div>}
+        <div className="eps">{eps(p).map((e) => <span key={e}>EP.{e}</span>)}<small>{eps(p).length} คอมเม้น</small></div></div>
+    </div>)}
+    <div className="ent-p p-s cut g pop" style={st(3, 4, 2.1)}>
+      <span className="av" aria-hidden="true">{ENT_INI.s}</span>
+      <div><div className="h"><b>ตัดทิ้ง</b><code>{ENT_ID.s}</code></div><div className="ent-note bad">ข้อความเดิมเป๊ะ (ระยะ 0) แปะซ้ำ 3 EP = บัญชีก๊อป</div></div>
+    </div>
+    <div className="ent-sum g fade" style={st(0, 1, 3.1)}><div><b>9</b><span>คอมเม้น</span></div><i>→</i><div><b>3</b><span>คน</span></div>
+      <p>ข้อมูลจริง: 852,802 คอมเม้น → <b>{fmt(D.n_people)}</b> คน · ตัดบัญชีก๊อป 10 บัญชี</p></div>
+  </div>;
+}
+
+/* ---------- comments + replies under one clip (made-up text and names; layout like YouTube) ---------- */
+const YT_EP = [...D.eps].sort((a, b) => b.comments - a.comments)[0];
+const YT_THREAD: { p: EntP | "d" | "e"; h: string; ago: string; txt: string; likes: string; reply?: boolean; n?: number }[] = [
+  { p: "a", h: "@ผู้ชม_ก", ago: "4 วันที่ผ่านมา", txt: "ขอบคุณทีมงานที่ตามเรื่องนี้จนจบครับ", likes: "1.2 พัน", n: 1 },
+  { p: "b", h: "@ผู้ชม_ข", ago: "3 วันที่ผ่านมา", txt: "@ผู้ชม_ก เห็นด้วยครับ", likes: "37", reply: true },
+  { p: "d", h: "@ผู้ชม_ง", ago: "2 สัปดาห์ที่ผ่านมา", txt: "สงสารผู้เสียหายมาก ขอให้ได้รับความเป็นธรรม", likes: "214", n: 1 },
+  { p: "e", h: "@ผู้ชม_จ", ago: "2 สัปดาห์ที่ผ่านมา", txt: "ใช่ค่ะ ต้องสู้ต่อไป", likes: "12", reply: true },
+];
+function YtIn() {
+  return <div className="yt-in">
+    <div className="yt-vid g fade" style={st(0, 1, 0.2)}><img src={`/thumbs/${YT_EP.vid}.jpg`} alt="" /><div><b>EP.{YT_EP.ep}</b><span>{YT_EP.title}</span><small>{fmt(YT_EP.comments)} ความคิดเห็น</small></div></div>
+    <div className="yt-list">
+      {YT_THREAD.map((c, k) => <div key={k} className={`yt-c p-${c.p}${c.reply ? " rp" : ""} g fade`} style={st(k, YT_THREAD.length, 0.5)}>
+        <span className="av" aria-hidden="true">{c.h.slice(-1)}</span>
+        <div><div className="h">{c.h}<small>{c.ago} · 👍 {c.likes}</small><em className={c.reply ? "rp" : "cm"}>{c.reply ? "reply" : "คอมเม้น"}</em></div>
+          <p>{c.txt}</p>
+          {c.n ? <div className="more">▾ การตอบกลับ {c.n} รายการ</div> : null}</div>
+      </div>)}
+    </div>
+    <p className="yt-foot g fade" style={st(0, 1, 1.6)}>เก็บทั้ง<b className="cm">คอมเม้น</b>และ<b className="rp">reply</b>แบบนี้ครบทุกคลิป × {D.n_eps} EP · reply = 18.4% ของทั้งหมด</p>
+  </div>;
+}
+
 /* ---------- why network: table view vs network view (real aggregates) ---------- */
 const famC = D.categories.find((c) => c.name === "ครอบครัว & ความสัมพันธ์")!, crimeC = D.categories.find((c) => c.name === "อาชญากรรม & การหลอกลวง")!;
 const JFC = 0.1713, overlapFC = Math.round((JFC * (famC.people + crimeC.people)) / (1 + JFC)), uniqFC = famC.people + crimeC.people - overlapFC;
@@ -261,8 +328,8 @@ function CommentSample() {
   ];
   return <><h2>ตัวอย่างตารางที่ได้: คอมเม้น <span>852,802 แถว × 12 ช่อง</span></h2>
     <div className="m-tbl"><table><thead><tr><th>cid</th><th>video_id</th><th>reply</th><th>text</th><th>author</th><th>channel</th><th className="r">votes</th><th className="r">replies</th><th>time</th><th>heart</th></tr></thead>
-      <tbody>{R.map((r, i) => <tr key={i} className="g fade" style={{ animationDelay: `${0.2 + i * 0.08}s` }}><td className="mono">{r[0]}</td><td className="mono">{vid}</td><td className="mono">{String(r[7])}</td><td><i className="mask" style={{ width: `${60 + ((i * 37) % 70)}px` }} /></td><td className="mono">{r[2]}</td><td className="mono">{r[3]}</td><td className="r mono">{r[4]}</td><td className="r mono">{r[5]}</td><td>{r[6]}</td><td className="mono">{String(r[8])}</td></tr>)}
-        <tr className="more"><td colSpan={10}>… อีก 852,797 แถว · มีช่อง time_parsed และ scraped_at (เวลาแบบตัวเลข) ด้วย</td></tr></tbody></table></div>
+      <tbody>{R.slice(0, 3).map((r, i) => <tr key={i} className="g fade" style={{ animationDelay: `${0.2 + i * 0.08}s` }}><td className="mono">{r[0]}</td><td className="mono">{vid}</td><td className="mono">{String(r[7])}</td><td><i className="mask" style={{ width: `${60 + ((i * 37) % 70)}px` }} /></td><td className="mono">{r[2]}</td><td className="mono">{r[3]}</td><td className="r mono">{r[4]}</td><td className="r mono">{r[5]}</td><td>{r[6]}</td><td className="mono">{String(r[8])}</td></tr>)}
+        <tr className="more"><td colSpan={10}>… อีก 852,799 แถว · มีช่อง time_parsed และ scraped_at (เวลาแบบตัวเลข) ด้วย</td></tr></tbody></table></div>
     <p className="m-note">รูปแบบของแต่ละช่องเหมือนข้อมูลจริง (เช่น votes เป็นข้อความ "1.2 พัน", time เป็น "4 วันที่ผ่านมา") แต่ปิดข้อความ ชื่อบัญชี และรหัสไว้ตามกฎความเป็นส่วนตัว ข้อมูลจริงเก็บในเครื่องเท่านั้น</p></>;
 }
 
@@ -276,12 +343,13 @@ const TOPICS_ALL: Topic[] = [
     In: () => <TitleList />, Out: () => <Cols v={byMonth} labels={TH_M} top={(i) => String(byMonth[i])} label="จำนวน EP ต่อเดือน" />,
     inp: "หน้าช่อง YouTube ทุกคลิป", model: "Tokenization: แยกชื่อคลิปเป็นส่วนๆ", params: "ตัดชื่อคลิปแต่ละเรื่องออกเป็นเลข EP · ชื่อเรื่อง · วันที่ไทย · แก้ชื่อเดือนที่พิมพ์ผิด แล้วเก็บเฉพาะคลิปปี 69", tech: ["#30 Tokenization & N-grams"], paths: [["Text Analytics", "#30 Tokenization & N-grams", "Regular expression (regex) แยกเลข EP และวันที่ไทย"]], real: "ดึงรายชื่อคลิปด้วยเครื่องมือฟรีจากหน้าเว็บสาธารณะ แล้วใช้รูปแบบข้อความ (regex) แยกส่วน", out: "227 EP (1 ม.ค.–20 พ.ย. 2569)",
     read: "รายการออกเกือบทุกวันทำการ เดือนละราว 20 EP", why: "ไม่ใช้ YouTube Data API เพราะต้องมี key และมีโควตา" },
-  { ch: 0, box: "เก็บข้อมูล", yt: true, sample: () => <CommentSample />, title: "ดึงคอมเม้นและ reply", kind: "rule", biz: {"q": [], "in": "เสียงคนดูที่เปิดเผยต่อสาธารณะ", "proc": "เก็บพฤติกรรมคนดูจริงแทนการทำแบบสอบถาม โดยไม่มีค่าใช้จ่าย", "out": "หลักฐานพฤติกรรมคนดู 852,802 ครั้ง"}, inCap: "227 EP", outCap: "คอมเม้นต่อ EP เรียงตามวันออกอากาศ",
-    In: () => <Grid n={227} cols={19} color={() => "var(--m-dim)"} label="227 EP" />, Out: () => <Cols v={epComments} color={() => "var(--m-c0)"} label="คอมเม้นต่อ EP ตามลำดับวันที่" />,
+  { ch: 0, box: "เก็บข้อมูล", yt: true, sample: () => <CommentSample />, title: "ดึงคอมเม้นและ reply", kind: "rule", biz: {"q": [], "in": "เสียงคนดูที่เปิดเผยต่อสาธารณะ", "proc": "เก็บพฤติกรรมคนดูจริงแทนการทำแบบสอบถาม โดยไม่มีค่าใช้จ่าย", "out": "หลักฐานพฤติกรรมคนดู 852,802 ครั้ง"}, illus: "ภาพ Input เป็นตัวอย่างสมมติ: ชื่อบัญชีและข้อความไม่ใช่ของจริง (ชื่อคลิปและจำนวนความคิดเห็นเป็นของจริง)", inCap: "คอมเม้น + reply ใต้คลิป × 227 EP",
+    outCap: "คอมเม้นต่อ EP เรียงตามวันออกอากาศ",
+    In: () => <YtIn />, Out: () => <Cols v={epComments} color={() => "var(--m-c0)"} label="คอมเม้นต่อ EP ตามลำดับวันที่" />,
     inp: "227 EP", model: "เก็บข้อมูลจากหน้าเว็บสาธารณะ", params: "ไม่ใช้ API ที่เสียเงิน · พัก 2–5 วินาทีต่อคลิป · ลองซ้ำได้ 4 ครั้ง · คลิปจำกัดอายุ 10 EP ใช้ cookie แล้วลบทิ้ง", tech: ["ยังไม่ใช้เทคนิควิเคราะห์"], paths: [["เก็บข้อมูล", "ยังไม่ใช้เทคนิควิเคราะห์", "Web scraping จากหน้าเว็บสาธารณะ"]], out: "852,802 แถว (reply 18.4%)",
     read: `แต่ละตอนได้คอมเม้นต่างกันมาก ตั้งแต่ ${fmt(Math.min(...epComments))} ถึง ${fmt(Math.max(...epComments))}`, why: "อ่านจากหน้าเว็บสาธารณะ ช้ากว่า API แต่ไม่มีค่าใช้จ่าย" },
-  { ch: 1, box: "Distance", title: "ระบุตัวคน (Entity resolution)", kind: "rule", biz: {"q": [], "in": "คอมเม้นที่ยังไม่รู้ว่าใครเป็นใคร", "proc": "นับเป็นคน ไม่ใช่นับเป็นข้อความ และตัดบัญชีปั่น", "out": "ฐานคนดู 281,073 คน ที่ใช้ตอบได้ทั้งเรื่องวัย (ก) และคนเก่า/คนใหม่ (ข)"}, inCap: "คอมเม้น 852,802 แถว (1 ช่อง ≈ 2,840 แถว)", outCap: "คน 281,073 คน (1 วง ≈ 2,840 คน)",
-    In: () => <Grid n={300} cols={20} color={() => "var(--m-dim)"} label="คอมเม้น 852,802 แถว" />, Out: () => <Grid n={99} cols={11} shape="dot" size={26} color={() => "var(--m-c0)"} label="คน 281,073 คน" />,
+  { ch: 1, box: "Distance", title: "ระบุตัวคน (Entity resolution)", kind: "rule", biz: {"q": [], "in": "คอมเม้นที่ยังไม่รู้ว่าใครเป็นใคร", "proc": "นับเป็นคน ไม่ใช่นับเป็นข้อความ และตัดบัญชีปั่น", "out": "ฐานคนดู 281,073 คน ที่ใช้ตอบได้ทั้งเรื่องวัย (ก) และคนเก่า/คนใหม่ (ข)"}, illus: "ภาพเป็นตัวอย่างสมมติ: ชื่อบัญชี ข้อความ และ id ไม่ใช่ของจริง (ข้อมูลรายคนเก็บในเครื่องเท่านั้น)", inCap: "คอมเม้นทีละแถว: ยังไม่รู้ว่าใครเป็นใคร (ของจริง 852,802 แถว)", outCap: "1 โปรไฟล์ต่อ 1 คน (ของจริง 281,073 คน)",
+    In: () => <EntIn />, Out: () => <EntOut />,
     inp: "852,802 แถว มี handle และ channel id", model: "Distance Measures: ข้อความเหมือนกัน = ระยะ 0", params: "รวมแถวเป็นคนด้วย channel id · คนที่ ≥80% ของคอมเม้นเป็นข้อความเดียวกัน (ระยะ 0, ยาว ≥10 ตัวอักษร) แปะซ้ำ ≥3 EP ถือเป็นคนก๊อป ตัดทิ้ง", tech: ["#32 Distance Measures"], paths: [["Similarity, Recommendation & Clustering", "#32 Distance Measures", "Exact match (ข้อความเหมือนกัน = ระยะ 0) + รวมตาม channel id"]], out: "281,073 คน (ตัด 10 บัญชี)",
     read: "คอมเม้น 3 แถว ยุบเหลือคน 1 คนโดยเฉลี่ย", why: "handle เปลี่ยนได้ ถ้านับคนผิด เส้นในเครือข่ายผิดตามหมด" },
   { ch: 1, box: "Percentiles", title: "รูปร่างข้อมูลรายคน", kind: "stat", biz: {"q": ["ข"], "in": "จำนวนครั้งที่คนแต่ละคนกลับมา", "proc": "ดูว่าคนดูเป็นขาประจำหรือคนผ่านมา", "out": "คนใหม่เป็นฐานใหญ่ (64% มาครั้งเดียว) แต่คนที่กลับมาบ่อย 2.6% สร้างเสียง 26%"}, inCap: "% ของคน แยกตามจำนวน EP ที่มาคอมเม้น", outCap: "% ของคอมเม้นที่แต่ละกลุ่มเขียน",
@@ -322,10 +390,10 @@ const TOPICS_ALL: Topic[] = [
     In: () => <Hair />, Out: () => <Gauge rows={[{ t: "Modularity", v: 0.09, ref: 0.3, refT: "ราว 0.3 ขึ้นไป = มีก้อนชัด", max: 0.5 }, { t: "Cramér's V กับเดือน (ยิ่งสูงยิ่งผูกกับเวลา)", v: 0.29, ref: 0.14, refT: "รอบสองได้ 0.14", max: 0.5 }]} />,
     inp: "กราฟประเด็นย่อย ↔ ประเด็นย่อย", model: "รวมกลุ่มแท็กทีละขั้น (ใกล้เคียง Hierarchical Clustering)", params: "รวมแท็กที่มีคนคอมเม้นร่วมกันมากเข้าด้วยกันทีละขั้น · วัดคุณภาพด้วย modularity · ตรวจกับเดือนที่ออกอากาศด้วย Chi² (Cramér's V)", tech: ["#33 Hierarchical Clustering", "#18 Chi² Independence"], paths: [["Similarity, Recommendation & Clustering", "#33 Hierarchical Clustering", "Louvain (รวมกลุ่มทีละชั้นด้วย modularity)"], ["Correlation & Association", "#18 Chi² Independence", "Cramér's V"]], real: "วิธีที่ใช้จริงคือ Louvain ซึ่งรวมกลุ่มทีละชั้นแบบเดียวกับ Hierarchical Clustering แต่ใช้ modularity เป็นเกณฑ์รวม", out: "modularity 0.09 → ไม่ใช้",
     read: "แทบไม่มีก้อน และก้อนที่ได้ผูกกับช่วงเวลา ไม่ใช่ความสนใจจริง", why: "จึงเปลี่ยนไปวัดความสนใจรายคนแบบหักผลเวลาในขั้นสายคนดู" },
-  { ch: 4, box: "Jaccard", title: "เครือข่ายหมวด ↔ หมวด", kind: "net", biz: {"q": ["ข"], "in": "คนที่ดูมากกว่าหนึ่งหมวด", "proc": "วัดว่าหมวดไหนแย่งคนดูกัน", "out": "ซื้อข้ามก้อนเพื่อได้คนใหม่ (Acquisition) หรือซื้อในก้อนเดียวกันเพื่อย้ำคนเดิม (Retention)"}, illus: "ภาพ Input: ความยาวแท่งหมวดเป็นจำนวนคนจริง ส่วนเส้นจากคนเป็นตัวอย่าง", inCap: "กราฟสองฝั่ง คน ↔ หมวด", outCap: "ฉายเป็นหมวด ↔ หมวด น้ำหนัก Jaccard · สี = ก้อน",
+  { ch: 4, box: "Jaccard", title: "เครือข่ายหมวด ↔ หมวด", kind: "net", biz: {"q": ["ข"], "in": "คนที่ดูมากกว่าหนึ่งหมวด", "proc": "วัดว่าหมวดไหนแย่งคนดูกัน", "out": "ซื้อข้ามก้อนเพื่อได้คนใหม่ (Acquisition) หรือซื้อในก้อนเดียวกันเพื่อย้ำคนเดิม (Retention) · อยากได้ทั้งสองก้อน จับคู่สุขภาพกับข้อพิพาท (หมวดสะพาน)"}, illus: "ภาพ Input: ความยาวแท่งหมวดเป็นจำนวนคนจริง ส่วนเส้นจากคนเป็นตัวอย่าง", inCap: "กราฟสองฝั่ง คน ↔ หมวด", outCap: "ฉายเป็นหมวด ↔ หมวด น้ำหนัก Jaccard · สี = ก้อน · วงประ = หมวดสะพาน",
     In: () => <Bipartite />, Out: () => <CatNet />,
-    inp: "กราฟสองฝั่ง คน 281,073 ↔ EP 227", model: "Jaccard similarity → รวมกลุ่มทีละขั้น", params: "ความคล้ายของสองหมวด = คนดูร่วม ÷ คนดูรวม (Jaccard) · รวมหมวดที่คล้ายกันเป็นก้อน", tech: ["#32 Distance Measures", "#33 Hierarchical Clustering"], paths: [["Similarity, Recommendation & Clustering", "#32 Distance Measures", "Jaccard similarity"], ["Similarity, Recommendation & Clustering", "#33 Hierarchical Clustering", "Louvain (networkx, seed 42)"]], real: "ขั้นรวมกลุ่มใช้ Louvain ซึ่งใกล้เคียง Hierarchical Clustering", out: "2 ก้อน",
-    read: "ก้อนเรื่องร้อน 7 หมวด กับก้อนสุขภาพ ความเชื่อ ภัยพิบัติ · เส้นดำคือครอบครัว × อาชญากรรม 0.17", why: "เห็นว่าหมวดไหนแย่งคนกันหรือไม่ ซึ่งเป็นคำถามของการทำแพ็กเกจ" },
+    inp: "กราฟสองฝั่ง คน 281,073 ↔ EP 227", model: "Jaccard similarity → รวมกลุ่มทีละขั้น → Centrality", params: "ความคล้ายของสองหมวด = คนดูร่วม ÷ คนดูรวม (Jaccard) · รวมหมวดที่คล้ายกันเป็นก้อน · Strength = ผลรวม Jaccard ของหมวด · หมวดสะพาน = ผลรวม Jaccard ที่ไปหาอีกก้อนสูงสุด · Betweenness = 0 ทุกหมวด เพราะทุกคู่มีคนดูร่วมกัน", tech: ["#32 Distance Measures", "#33 Hierarchical Clustering"], paths: [["Similarity, Recommendation & Clustering", "#32 Distance Measures", "Jaccard similarity"], ["Similarity, Recommendation & Clustering", "#33 Hierarchical Clustering", "Louvain (networkx, seed 42)"], ["Network Analysis", "Centrality", "Weighted degree"]], real: "ขั้นรวมกลุ่มใช้ Louvain ซึ่งใกล้เคียง Hierarchical Clustering", out: "2 ก้อน · ศูนย์กลาง = อาชญากรรม · สะพาน = ข้อพิพาท",
+    read: "ก้อนเรื่องร้อน 7 หมวด กับก้อนสุขภาพ ความเชื่อ ภัยพิบัติ · เส้นดำคือครอบครัว × อาชญากรรม 0.17 · ศูนย์กลางคืออาชญากรรม (strength 1.12) · สะพานเชื่อม 2 ก้อนคือข้อพิพาท (0.22)", why: "เห็นว่าหมวดไหนแย่งคนกันหรือไม่ ซึ่งเป็นคำถามของการทำแพ็กเกจ" },
   { ch: 4, box: "Lift", title: "เครือข่ายหมวด ↔ Generation", kind: "net", biz: {"q": ["ก"], "in": "วัยของคนดูแต่ละหมวด", "proc": "จับคู่หมวดกับวัยที่แบรนด์ต้องการ", "out": "Gen Z → ดราม่าคนดัง · Gen X+ → สุขภาพ ศาสนา ความเชื่อ"}, inCap: "สัดส่วน Gen ของคนคอมเม้นในแต่ละหมวด (%)", outCap: "กราฟสองฝั่ง: เส้นหนา = คนมาก · เส้นสี = Gen นั้นมากกว่าปกติ · เส้นประ = น้อยกว่าปกติ",
     In: () => <GenStack />, Out: () => <GenNet />,
     inp: "Gen ที่ประเมินได้ของคนคอมเม้นในแต่ละหมวด (จากขั้นประเมิน Gen)", model: "Lift ของตาราง หมวด × Gen", params: "ต่อหมวดหาสัดส่วน Gen แล้วหารด้วยสัดส่วน Gen ของคนดูหมวดทั่วไป (observed ÷ expected แบบเดียวกับตาราง Chi²) · วาดเป็นกราฟสองฝั่ง น้ำหนักเส้น = จำนวนคนโดยประมาณ", tech: ["#18 Chi² Independence"], paths: [["Correlation & Association", "#18 Chi² Independence", "Lift = observed ÷ expected ในตาราง หมวด × Gen"]], out: "lift 30 คู่ อยู่ระหว่าง 0.90–1.07",
@@ -391,6 +459,109 @@ function Guests({ onNext, end, img = "/guests.jpg", alt = "ประเด็น
       {sparks.map(([x, y], k) => <i key={k} className="m-spark gv-spark" aria-hidden="true" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${0.6 + k * 0.45}s` }} />)}
     </div>
     <div className="gv-badges"><ViewCount /><span className="gv-live" aria-hidden="true"><i />{end ? "ขอบคุณที่รับชม" : "ON AIR"}</span></div>
+  </div>;
+}
+
+/** count up to a target after a delay (ms); jumps straight to the target when motion is reduced */
+function useCountUp(target: number, delay: number, dur = 1200) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { setN(target); return; }
+    let raf = 0; const t0 = performance.now() + delay;
+    const step = (now: number) => { const k = Math.max(0, Math.min(1, (now - t0) / dur)); setN(Math.round(target * (1 - (1 - k) ** 3))); if (k < 1) raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step); return () => cancelAnimationFrame(raf);
+  }, [target, delay, dur]);
+  return n;
+}
+
+/* why-network infographic: 4 parts revealed one click at a time (table view → where it fails → network view → business) */
+const WY_TOP = [...D.eps].sort((a, b) => b.comments - a.comments).slice(0, 4);
+const WY_PEOPLE = [12, 30, 48, 66, 84, 102, 120, 138];
+const WY_EPS = [20, 44, 68, 92, 116, 140];
+const WY_TIES: [number, number][] = [[0, 0], [1, 0], [1, 1], [2, 1], [2, 2], [3, 2], [3, 3], [4, 1], [4, 4], [5, 3], [5, 4], [6, 4], [6, 5], [7, 5]];
+const WY_BRIDGE = new Set([3, 4]);
+const wyD = (s: number): CSSProperties => ({ animationDelay: `${s}s` });
+
+function WyTable() {
+  const mx = WY_TOP[0].comments;
+  return <>
+    <p className="wy-sub">1 แถว = 1 EP · แต่ละตอนถูกนับแยกกัน</p>
+    <div className="wy-tbl">
+      <div className="wy-tr h"><span>EP</span><span>วิว</span><span>คอมเม้น</span></div>
+      {WY_TOP.map((e, k) => <div key={e.ep} className="wy-tr" style={wyD(0.3 + k * 0.15)}><span className="mono">{e.ep}</span><span className="mono">{(e.views / 1e6).toFixed(1)}M</span><span className="wy-bar"><i style={{ width: `${(e.comments / mx) * 100}%`, ...wyD(0.5 + k * 0.15) }} /><b>{fmt(e.comments)}</b></span></div>)}
+    </div>
+    <div className="wy-chips">
+      <span className="ok" style={wyD(1.3)}>✓ EP ไหนคอมเม้นเยอะ</span>
+      <span className="no" style={wyD(1.6)}>✗ คนตอนนี้ = คนตอนอื่นไหม? ไม่รู้</span>
+    </div>
+  </>;
+}
+
+function WyFail() {
+  const sum = famC.people + crimeC.people, over = Math.round((overlapFC / uniqFC) * 100);
+  const total = useCountUp(sum, 600), uniq = useCountUp(uniqFC, 2300);
+  return <>
+    <p className="wy-ask" style={wyD(0.1)}>แบรนด์ถาม: “ซื้อหมวดครอบครัว + อาชญากรรม ได้คนเท่าไหร่?”</p>
+    <div className="wy-sum" style={wyD(0.4)}><span className="lbl">ตาราง</span><span className="mono">{fmt(famC.people)} + {fmt(crimeC.people)} =</span><b className="bad">{fmt(total)}<i style={wyD(1.6)} /></b></div>
+    <svg className="wy-venn" viewBox="0 0 220 112" role="img" aria-label={`คนดูทั้งสองหมวด ${fmt(overlapFC)} คน`}>
+      <circle className="va" cx={84} cy={44} r={40} />
+      <circle className="vb" cx={136} cy={44} r={34} />
+      <text x={70} y={48} className="vt">ครอบครัว</text><text x={146} y={48} className="vt sm">อาชญากรรม</text>
+      <g className="vo" style={wyD(1.5)}><circle cx={113} cy={44} r={3} className="vdot" /><line x1={113} y1={47} x2={113} y2={88} className="vline" /><text x={113} y={100} className="vn">ดูทั้งคู่ {fmt(overlapFC)} คน</text></g>
+    </svg>
+    <div className="wy-sum net" style={wyD(2.1)}><span className="lbl">Network</span><span>คนไม่ซ้ำจริง</span><b className="good">{fmt(uniq)}</b></div>
+    <p className="wy-warn" style={wyD(3.2)}>ใช้ตัวเลขตาราง = ขาย reach เกินจริง <b>{over}%</b> · แบรนด์ตรวจเจอเมื่อไหร่ เสียความน่าเชื่อถือ</p>
+  </>;
+}
+
+function WyNet() {
+  const legend: [string, string, number][] = [["Actors", `คน ${fmt(D.n_people)} · EP ${D.n_eps} ตอน`, 0.2], ["Ties", "คนไปคอมเม้นตอนนั้น = 1 เส้น", 0.9], ["Structure", "ใครเชื่อมหลายตอน · ตอนไหนคนชุดเดียวกัน · หมวดไหนเป็นก้อนเดียวกัน", 2.2]];
+  const qa: [string, string][] = [["คนดูหมวดนี้ ไปดูหมวดไหนต่อ?", "ความแรงของเส้น"], ["คนกลุ่มไหน ดูอะไรด้วยกัน?", "ก้อนในกราฟ"], ["ซื้อเพิ่ม ได้คนใหม่หรือคนเดิม?", "คนที่ซ้อนกันระหว่างตอน"]];
+  const lv: [string, string, boolean][] = [["คน", "นับคนไม่ซ้ำ", false], ["หมวด (กลุ่ม)", "แบรนด์ซื้อเป็นแพ็กเกจหมวด", true], ["ทั้งเครือข่าย", "หมวดแบ่งเป็นกี่ก้อน", false]];
+  return <>
+    <div className="wy-netrow">
+      <svg className="wy-net" viewBox="0 0 300 152" role="img" aria-label="คนเชื่อมกับ EP สองหมวด คนตรงกลางเชื่อมทั้งสองหมวด">
+        <rect className="wy-hull a" style={wyD(2.2)} x={196} y={6} width={34} height={74} rx={12} />
+        <rect className="wy-hull b" style={wyD(2.2)} x={196} y={80} width={34} height={70} rx={12} />
+        <text className="wy-hl" style={wyD(2.4)} x={236} y={47}>ครอบครัว</text><text className="wy-hl" style={wyD(2.4)} x={236} y={119}>อาชญากรรม</text>
+        {WY_TIES.map(([p, e], k) => <line key={k} className={`wy-tie${WY_BRIDGE.has(p) ? " br" : ""}`} style={wyD(0.9 + k * 0.06)} pathLength={1} x1={34} y1={WY_PEOPLE[p]} x2={206} y2={WY_EPS[e]} />)}
+        {WY_PEOPLE.map((y, k) => <g key={k}>{WY_BRIDGE.has(k) && <circle className="wy-ring" style={wyD(2.3)} cx={34} cy={y} r={10} />}<circle className={`wy-p${WY_BRIDGE.has(k) ? " br" : ""}`} style={wyD(0.2 + k * 0.05)} cx={34} cy={y} r={6} /></g>)}
+        {WY_EPS.map((y, k) => <rect key={k} className={`wy-e ${k < 3 ? "a" : "b"}`} style={wyD(0.35 + k * 0.05)} x={206} y={y - 7} width={14} height={14} rx={3} />)}
+        <text className="wy-cap" x={34} y={150} textAnchor="middle" style={wyD(0.3)}>คน</text>
+      </svg>
+      <ol className="wy-legend">{legend.map(([h, d, s], k) => <li key={h} style={wyD(s)}><b>{["A", "T", "S"][k]}</b><div><h3>{h}</h3><p>{d}</p></div></li>)}</ol>
+    </div>
+    <div className="wy-qa">{qa.map(([q, a], k) => <div key={q} style={wyD(3 + k * 0.25)}><span className="q">{q}</span><span className="no">ตาราง ✗</span><span className="ok">✓ {a}</span></div>)}</div>
+    <div className="wy-lv" style={wyD(4)}><span className="h">ระดับการวิเคราะห์</span>{lv.map(([a, b, on]) => <span key={a} className={on ? "on" : ""}><b>{on ? "★ " : ""}{a}</b>{b}</span>)}</div>
+  </>;
+}
+
+function Why({ step, onStep, onNext }: { step: number; onStep: (s: number) => void; onNext: () => void }) {
+  const adv = () => (step < 4 ? onStep(step + 1) : onNext());
+  const card = (n: number, title: string, body: ReactNode, cls = "") => <section className={`wy-card ${cls}${step >= n ? " on" : ""}`}><h2><i>{n}</i>{title}</h2>{step >= n && <div className="wy-body">{body}</div>}</section>;
+  return <div className="m-cover light" onClick={adv} role="button" tabIndex={0} aria-label={`ทำไมต้องใช้ Network ส่วนที่ ${step} จาก 4 กดเพื่อดูต่อ`} onKeyDown={(e) => { if (e.key === "Enter") adv(); }}>
+    <div className="m-cv bo wy">
+      <img className="bo-logo" src="/hone-logo.png" alt="โหนกระแส" />
+      <div className="bo-head">
+        <span className="bo-eyebrow">เริ่มต้น · ทำไมต้องใช้ Network</span>
+        <h1>ตารางเห็นแต่ละตอนแยกกัน · Network เห็นว่าคนเชื่อมตอนเหล่านั้นเข้าด้วยกันยังไง</h1>
+      </div>
+      <div className="wy-grid">
+        {card(1, "ตารางเห็นข้อมูลเป็นอะไร", <WyTable />)}
+        {card(2, "จุดที่ตารางพลาด: ตัวอย่างจริง", <WyFail />)}
+        {card(3, "Network: จากแถว เป็นความสัมพันธ์", <WyNet />, "wide")}
+      </div>
+      <section className={`wy-biz${step >= 4 ? " on" : ""}`}>
+        <h2><i>4</i>ธุรกิจได้อะไร</h2>
+        {step >= 4 && <div className="wy-bizb">
+          <p className="from"><span>ตาราง</span>“EP ไหนใหญ่?”</p>
+          <span className="arr" aria-hidden="true">→</span>
+          <p className="to"><span>Network</span>“ควรซื้อ EP ไหนรวมกัน ถึงจะได้คนที่แบรนด์ต้องการ”</p>
+          <p className="deck">คำถามทีมขายเปลี่ยนเป็น “จัดแพ็กเกจยังไงให้ได้ reach จริงและได้คนตรงกลุ่ม” ซึ่งทั้ง deck นี้จะตอบ</p>
+        </div>}
+      </section>
+      <div className="wy-steps" aria-hidden="true">{[1, 2, 3, 4].map((n) => <i key={n} className={step >= n ? "on" : ""} />)}<span>{step < 4 ? "คลิกเพื่อดูต่อ" : "คลิกไปหน้าถัดไป"}</span></div>
+    </div>
   </div>;
 }
 
@@ -554,18 +725,21 @@ export default function Models() {
   const isMeasure = i === TOPICS.length + 3;
   const isThanks = i === TOPICS.length + 4;
   const isEnd = i === TOPICS.length || i === TOPICS.length + 1;
+  const isWhy = i === -2;
+  const [whyStep, setWhyStep] = useState(1);
+  useEffect(() => { setWhyStep(1); }, [i]);
   const t = i >= 0 && i < TOPICS.length ? TOPICS[i] : i === -2 ? WHY : null;
-  const cover = i <= -3 || isEnd || isThanks || isMeasure;
-  const lightSlide2 = isMeasure;
+  const cover = i <= -3 || isEnd || isThanks || isMeasure || isWhy;
+  const lightSlide2 = isMeasure || isWhy;
   const lightSlide = i === -3;
   useEffect(() => { const on = () => { setI(readIdx()); window.scrollTo(0, 0); }; addEventListener("hashchange", on); return () => removeEventListener("hashchange", on); }, []);
   useEffect(() => { window.scrollTo(0, 0); const old = document.title; return () => { document.title = old; }; }, []);
   useEffect(() => { document.title = `ReachRadar · ${t ? t.title : "ภาพรวม Process"}`; }, [t]);
   const go = (k: number) => { location.hash = hashOf(Math.max(-5, Math.min(TOPICS.length + 4, k))); };
   useEffect(() => {
-    const k = (e: KeyboardEvent) => { if (e.target instanceof HTMLInputElement) return; if (e.key === "p" || e.key === "P") setPresent((x) => !x); if ((e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") && i < TOPICS.length + 4) { e.preventDefault(); go(i + 1); } if (e.key === "PageUp" && i > -5) go(i - 1); if (e.key === "ArrowLeft" && i > -5) go(i - 1); };
+    const k = (e: KeyboardEvent) => { if (e.target instanceof HTMLInputElement) return; if (e.key === "p" || e.key === "P") setPresent((x) => !x); if ((e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") && i < TOPICS.length + 4) { e.preventDefault(); if (i === -2 && whyStep < 4) setWhyStep(whyStep + 1); else go(i + 1); } if ((e.key === "PageUp" || e.key === "ArrowLeft") && i > -5) { if (i === -2 && whyStep > 1) setWhyStep(whyStep - 1); else go(i - 1); } };
     addEventListener("keydown", k); return () => removeEventListener("keydown", k);
-  }, [i]);
+  }, [i, whyStep]);
 
   return (
     <div className={`models k-${t ? t.kind : "ml"}${present ? " present" : ""}${cover ? " is-cover" : ""}${lightSlide || lightSlide2 ? " is-light" : ""}`}>
@@ -588,7 +762,7 @@ export default function Models() {
       </header>
 
       <span className="m-pageno" aria-label="หน้า">{i + 6} / {TOPICS.length + 10}</span>
-      {isGraph ? <div className="m-graphonly m-viz" onClick={(e) => { if ((e.target as HTMLElement).closest(".m-tri")) return; go(i + 1); }}><TriNet /></div> : isMeasure ? <Measure onNext={() => go(i + 1)} /> : isThanks ? <ThankYou onNext={() => go(-5)} /> : i === TOPICS.length + 1 ? <Guests end img="/final.jpg" alt="ปิดท้าย · ดาว MADT และแบงค์ MADT (นามสมมุติ)" ratio="1670 / 942" onNext={() => go(i + 1)} /> : isEnd ? <Guests end onNext={() => go(i + 1)} /> : i === -5 ? <Cover onNext={() => go(-4)} /> : i === -4 ? <Guests onNext={() => go(-3)} /> : i === -3 ? <Objective onNext={() => go(-2)} /> : <main className={`m-page ${t ? (t.big ? "topic long big" : t.sample ? "topic long" : "topic") : "ov"}`} key={`${i}-${run}`}>
+      {isGraph ? <div className="m-graphonly m-viz" onClick={(e) => { if ((e.target as HTMLElement).closest(".m-tri")) return; go(i + 1); }}><TriNet /></div> : isMeasure ? <Measure onNext={() => go(i + 1)} /> : isThanks ? <ThankYou onNext={() => go(-5)} /> : i === TOPICS.length + 1 ? <Guests end img="/final.jpg" alt="ปิดท้าย · ดาว MADT และแบงค์ MADT (นามสมมุติ)" ratio="1670 / 942" onNext={() => go(i + 1)} /> : isEnd ? <Guests end onNext={() => go(i + 1)} /> : i === -5 ? <Cover onNext={() => go(-4)} /> : i === -4 ? <Guests onNext={() => go(-3)} /> : i === -3 ? <Objective onNext={() => go(-2)} /> : isWhy ? <Why step={whyStep} onStep={setWhyStep} onNext={() => go(-1)} /> : <main className={`m-page ${t ? (t.big ? "topic long big" : t.sample ? "topic long" : "topic") : "ov"}`} key={`${i}-${run}`}>
         {!t ? <><Overview /><nav className="m-nav"><button type="button" onClick={() => go(-2)}>← {WHY.title}</button><button type="button" onClick={() => go(0)}>{TOPICS[0].title} →</button></nav></> : <>
         <div className="m-title">
           <div><span className="m-ch">{t === WHY ? "เริ่มต้น" : CHAPTERS[t.ch]}</span><h1>{t.title}</h1>{present && <p className="m-takeaway">{t.read}</p>}</div>

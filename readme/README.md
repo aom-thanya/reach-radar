@@ -33,5 +33,6 @@ ReachRadar วิเคราะห์คนที่คอมเม้นใน
 | หน้าหลังบ้านทีมการตลาด | ✅ 5 หน้า รวมเครื่องมือวางแผนแคมเปญ ([01_business.md](01_business.md)) · เป็นโปรเจกต์ React + TypeScript ใน `web/` · มีหน้าซ่อน `#journey` เล่าประวัติการทำงานเป็นภาพเคลื่อนไหว และ `#models` สรุป Input → โมเดล → Output ทีละขั้น |
 | Pilot วัด conversion กับแบรนด์ | 📝 แผนรออนุมัติ · ชุดอุปกรณ์ (Google Sheet + สคริปต์สุ่ม) พร้อมแล้ว |
 | สายคนดู (Community ตามความสนใจรายคน) | ✅ k-means K = 4 บนขาประจำ 55,838 คน · อยู่ใน Dashboard แล้ว |
+| Centrality ของหมวด | ✅ `24_category_centrality.py` · ศูนย์กลาง = อาชญากรรม/ข้อพิพาท · สะพาน = ข้อพิพาท · betweenness = 0 (กราฟเชื่อมครบ) |
 | Network Graph + Dashboard | ✅ ชุดแรก เลิกใช้บนเว็บแล้ว เก็บไว้ที่ `web_src/old/site_index.html` |
 | เผยแพร่เป็นพอร์ต (Vercel + GitHub) | ✅ GitHub ([aom-thanya/reachradar](https://github.com/aom-thanya/reachradar)) + Vercel deploy ผ่านแล้ว (28 พ.ย.) · สแกน privacy ไฟล์ที่ขึ้นแล้ว (ยอดรวมล้วน) · ยังไม่ได้แยก `data/public/` ([06](06_tech_pipeline.md), [07](07_limitations_privacy.md)) |

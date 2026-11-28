@@ -110,6 +110,7 @@ export const HOW: Record<string, HowStep[]> = {
     { v: <VennMini a={`${Math.round(fam.people / 1000)}k`} b={`${Math.round(crime.people / 1000)}k`} j={`${Math.round(inter / 1000)}k`} />, t: "คนที่คอมเม้นหมวดครอบครัว กับหมวดอาชญากรรม และคนที่ซ้อนกัน" },
     { v: <Code>Jaccard = คนซ้อน ÷ คนรวม<br />= {fmt(inter)} ÷ {fmt(uni)} = 0.17</Code>, t: "คิดความคล้ายของทุกคู่หมวด ได้ 45 เส้น" },
     { v: <MergeMini phase={2} />, t: "ใช้ความคล้ายเป็นน้ำหนักเส้น แล้วรวมกลุ่มทีละขั้น ได้ 2 ก้อน" },
+    { v: <Code>strength = ผลรวม Jaccard ทุกเส้น<br />อาชญากรรม 1.12 · ข้อพิพาท 1.09</Code>, t: "Centrality: ศูนย์กลางคืออาชญากรรม · สะพานเชื่อม 2 ก้อนคือข้อพิพาท (แชร์คนกับก้อนสุขภาพมากสุด)" },
   ],
   "เครือข่ายหมวด ↔ Generation": [
     { v: <Bars rows={[["ดราม่า Gen Z", drama.gen["Gen Z"], G.z]]} max={25} />, t: `คนคอมเม้นดราม่าคนดังเป็น Gen Z ${drama.gen["Gen Z"]}% (observed)` },
