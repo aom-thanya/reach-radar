@@ -80,7 +80,7 @@ ReachRadar/
 
 ## Hosting (ฟรี)
 - ตอนนี้: หน้าหลังบ้านเป็นโปรเจกต์ React 18 + TypeScript + Vite ใน `web/` · ดูในเครื่องด้วย `npm run dev` จากในโฟลเดอร์ `web/` · Export PDF ใช้ html2canvas + jsPDF ดาวน์โหลดไฟล์ได้ตรงๆ
-- แผนเผยแพร่เป็นพอร์ต (ยังไม่ได้ deploy): **Vercel แผน Hobby** (ฟรี ใช้ได้กับงานที่ไม่ใช่เชิงพาณิชย์)
+- เผยแพร่เป็นพอร์ต (deploy แล้ว 28 พ.ย. 2569 ผูกกับ GitHub `main` push แล้ว build ใหม่เอง): **Vercel แผน Hobby** (ฟรี ใช้ได้กับงานที่ไม่ใช่เชิงพาณิชย์)
   - เว็บเป็น static site ไม่มี backend ข้อมูลยอดรวมรวมอยู่ในไฟล์ JS ตอน build
   - ตั้ง Root Directory = `web` และ Framework = Vite (Vercel ตรวจเจอเอง: build `npm run build`, output `dist`) หรือรัน `vercel --prod` จากในโฟลเดอร์ `web/`
   - URL ที่จะได้: `/` (หน้าหลังบ้าน) หน้าเดียว เปิดเป็นสาธารณะ

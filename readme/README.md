@@ -34,4 +34,4 @@ ReachRadar วิเคราะห์คนที่คอมเม้นใน
 | Pilot วัด conversion กับแบรนด์ | 📝 แผนรออนุมัติ · ชุดอุปกรณ์ (Google Sheet + สคริปต์สุ่ม) พร้อมแล้ว |
 | สายคนดู (Community ตามความสนใจรายคน) | ✅ k-means K = 4 บนขาประจำ 55,838 คน · อยู่ใน Dashboard แล้ว |
 | Network Graph + Dashboard | ✅ ชุดแรก เลิกใช้บนเว็บแล้ว เก็บไว้ที่ `web_src/old/site_index.html` |
-| เผยแพร่เป็นพอร์ต (Vercel + GitHub) | 🟡 GitHub push แล้ว ([aom-thanya/reachradar](https://github.com/aom-thanya/reachradar)) · Vercel ยังไม่ deploy · รอตรวจ privacy ของไฟล์ใน `web/` และแยก `data/public/` ([06](06_tech_pipeline.md), [07](07_limitations_privacy.md)) |
+| เผยแพร่เป็นพอร์ต (Vercel + GitHub) | ✅ GitHub ([aom-thanya/reachradar](https://github.com/aom-thanya/reachradar)) + Vercel deploy ผ่านแล้ว (28 พ.ย.) · สแกน privacy ไฟล์ที่ขึ้นแล้ว (ยอดรวมล้วน) · ยังไม่ได้แยก `data/public/` ([06](06_tech_pipeline.md), [07](07_limitations_privacy.md)) |
