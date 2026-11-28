@@ -79,6 +79,7 @@
 .mask { display: inline-block; width: 90px; height: 10px; border-radius: 3px; background: var(--j-faint); }
 .mask.w2 { width: 60px; } .mask.w3 { width: 110px; }
 .j-cta { display: inline-block; background: var(--accent); color: var(--accent-ink); padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+.j-cta2 { display: inline-block; margin-left: 12px; padding: 10px 4px; font-weight: 600; }
 .j-foot { max-width: 1240px; margin: 0 auto; padding: 24px max(20px, env(safe-area-inset-right, 0px)) calc(32px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); font-size: 13px; color: var(--ink-3); border-top: 1px solid var(--line); }
 
 @media (max-width: 820px) {

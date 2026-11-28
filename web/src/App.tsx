@@ -12,8 +12,9 @@ import Planner from "./pages/Planner";
 import Safety from "./pages/Safety";
 import Slots from "./pages/Slots";
 
-// Hidden page: reachable only by typing #journey, not listed in the menu.
+// Hidden pages: reachable only by typing #journey or #models, not listed in the menu.
 const Journey = lazy(() => import("./journey/Journey"));
+const Models = lazy(() => import("./journey/Models"));
 
 const ROUTES: Record<PageId, ComponentType> = { home: Home, match: Match, slots: Slots, packages: Packages, safety: Safety, audience: Audience, brands: Brands, planner: Planner };
 
@@ -52,12 +53,13 @@ function Shell() {
 }
 
 export default function App() {
-  const [hidden, setHidden] = useState(() => location.hash === "#journey");
+  const hiddenOf = () => (location.hash === "#journey" ? "journey" : location.hash.startsWith("#models") ? "models" : null);
+  const [hidden, setHidden] = useState(hiddenOf);
   useEffect(() => {
-    const on = () => setHidden(location.hash === "#journey");
+    const on = () => setHidden(hiddenOf());
     window.addEventListener("hashchange", on);
     return () => window.removeEventListener("hashchange", on);
   }, []);
-  if (hidden) return <Suspense fallback={null}><Journey /></Suspense>;
+  if (hidden) return <Suspense fallback={null}>{hidden === "journey" ? <Journey /> : <Models />}</Suspense>;
   return <OverlayProvider><Shell /></OverlayProvider>;
 }
